@@ -32,11 +32,14 @@ import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("WeakerAccess")
 public class SpongeTaskChainFactory extends TaskChainFactory {
-
     private SpongeTaskChainFactory(GameInterface impl) {
         super(impl);
     }
-    public static TaskChainFactory create(PluginContainer plugin) {
+
+    public static TaskChainFactory create(PluginContainer pluginContainer) {
+        return create(pluginContainer.getInstance().orElse(null));
+    }
+    public static TaskChainFactory create(Object plugin) {
         return new SpongeTaskChainFactory(new SpongeGameInterface(plugin));
     }
 
@@ -44,12 +47,11 @@ public class SpongeTaskChainFactory extends TaskChainFactory {
         private final AsyncQueue asyncQueue;
         private final Object plugin;
 
-        private SpongeGameInterface(PluginContainer plugin) {
-            final Object pluginObject = plugin.getInstance().orElse(null);
-            if (pluginObject == null) {
-                throw new NullPointerException("Plugin can not be null");
+        private SpongeGameInterface(Object plugin) {
+            if (plugin == null || !Sponge.getPluginManager().fromInstance(plugin).isPresent()) {
+                throw new IllegalArgumentException("Not a valid Sponge Plugin");
             }
-            this.plugin = pluginObject;
+            this.plugin = plugin;
             this.asyncQueue = new TaskChainAsyncQueue();
         }
 
