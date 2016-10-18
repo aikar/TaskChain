@@ -56,11 +56,6 @@ public class SpongeTaskChainFactory extends TaskChainFactory {
         }
 
         @Override
-        public void postAsync(Runnable run) {
-            asyncQueue.postAsync(run);
-        }
-
-        @Override
         public void scheduleTask(int gameUnits, Runnable run) {
 
         }

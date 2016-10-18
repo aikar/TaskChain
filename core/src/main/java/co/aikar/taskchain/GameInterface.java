@@ -49,7 +49,9 @@ public interface GameInterface {
      * Execute the runnable off of the main thread
      * @param run
      */
-    void postAsync(Runnable run);
+    default void postAsync(Runnable run) {
+        getAsyncQueue().postAsync(run);
+    };
 
     /**
      * Schedule a task within the games scheduler using its own units
@@ -65,8 +67,8 @@ public interface GameInterface {
      * Every factory created needs to register a way to automatically shut itself down (On Disable)
      *
      * If its impossible to provide automatic shutdown registry, you should leave this method blank
-     * and manually call {@link TaskChainFactory#shutdown()}
-     * @param factory
+     * and manually call {@link TaskChainFactory#shutdown(int, TimeUnit)}
+     * @param factory Factory to shutdown
      */
     void registerShutdownHandler(TaskChainFactory factory);
 

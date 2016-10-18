@@ -69,11 +69,6 @@ public class BukkitTaskChainFactory extends TaskChainFactory {
         }
 
         @Override
-        public void postAsync(Runnable run) {
-            asyncQueue.postAsync(run);
-        }
-
-        @Override
         public void scheduleTask(int ticks, Runnable run) {
             Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, run, ticks);
         }
