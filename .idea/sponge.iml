@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+<module com.demonwav.mcdev.MinecraftModuleTypes="SPONGE_MODULE_TYPE" org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/sponge/target/classes" />
     <output-test url="file://$MODULE_DIR$/sponge/target/test-classes" />
@@ -10,5 +10,27 @@
     <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="core" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.spongepowered:spongeapi:5.0.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.slf4j:slf4j-api:1.7.21" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.guava:guava:17.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.code.gson:gson:2.2.4" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.apache.commons:commons-lang3:3.3.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.code.findbugs:jsr305:1.3.9" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.inject:guice:4.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: javax.inject:javax.inject:1" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: aopalliance:aopalliance:1.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.ben-manes.caffeine:caffeine:2.3.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.github.ben-manes.caffeine:guava:2.3.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.spongepowered:plugin-meta:0.2.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: ninja.leaping.configurate:configurate-hocon:3.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.typesafe:config:1.3.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: ninja.leaping.configurate:configurate-core:3.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: ninja.leaping.configurate:configurate-gson:3.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: ninja.leaping.configurate:configurate-yaml:3.2" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.yaml:snakeyaml:1.16" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.flowpowered:flow-math:1.0.3" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.flowpowered:flow-noise:1.0.1-SNAPSHOT" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.ow2.asm:asm:5.0.3" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.spongepowered:event-gen-core:2.1.0-SNAPSHOT" level="project" />
   </component>
 </module>

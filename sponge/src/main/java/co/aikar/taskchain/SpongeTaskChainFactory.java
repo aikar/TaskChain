@@ -23,20 +23,33 @@
 
 package co.aikar.taskchain;
 
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.game.state.GameStoppingEvent;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scheduler.Task;
+
+import java.util.concurrent.TimeUnit;
+
+@SuppressWarnings("WeakerAccess")
 public class SpongeTaskChainFactory extends TaskChainFactory {
 
     private SpongeTaskChainFactory(GameInterface impl) {
         super(impl);
     }
-    public static TaskChainFactory create(Object plugin) {
-        // TODO: Ensure it's a plugin?
+    public static TaskChainFactory create(PluginContainer plugin) {
         return new SpongeTaskChainFactory(new SpongeGameInterface(plugin));
     }
 
     private static class SpongeGameInterface implements GameInterface {
         private final AsyncQueue asyncQueue;
+        private final Object plugin;
 
-        public SpongeGameInterface(Object plugin) {
+        private SpongeGameInterface(PluginContainer plugin) {
+            final Object pluginObject = plugin.getInstance().orElse(null);
+            if (pluginObject == null) {
+                throw new NullPointerException("Plugin can not be null");
+            }
+            this.plugin = pluginObject;
             this.asyncQueue = new TaskChainAsyncQueue();
         }
 
@@ -52,17 +65,19 @@ public class SpongeTaskChainFactory extends TaskChainFactory {
 
         @Override
         public void postToMain(Runnable run) {
-
+            Task.builder().execute(run).submit(plugin);
         }
 
         @Override
         public void scheduleTask(int gameUnits, Runnable run) {
-
+            Task.builder().delayTicks(gameUnits).execute(run).submit(plugin);
         }
 
         @Override
         public void registerShutdownHandler(TaskChainFactory factory) {
-
+            Sponge.getEventManager().registerListener(plugin, GameStoppingEvent.class, event -> {
+                factory.shutdown(60, TimeUnit.SECONDS);
+            });
         }
     }
 }
