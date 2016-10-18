@@ -1,0 +1,99 @@
+/*
+ * Copyright (c) 2016. Starlis LLC / dba Empire Minecraft
+ *
+ * This source code is proprietary software and must not be redistributed without Starlis LLC's approval
+ *
+ */
+
+package co.aikar.taskchain;
+
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
+
+public class TaskChainExample {
+
+    /**
+     * A useless example of registering multiple task signatures and states
+     */
+    public static void example(Plugin plugin) {
+        TaskChainUtil.log("Starting example");
+        final TaskChainFactory factory = BukkitTaskChainFactory.create(plugin);
+        TaskChain<?> chain = factory.newSharedChain("TEST");
+        chain
+            .delay(20 * 3)
+            .sync(() -> {
+                Object test = chain.setTaskData("test", 1);
+                TaskChainUtil.log("==> 1st test");
+            })
+            .delay(20)
+            .async(() -> {
+                Object test = chain.getTaskData("test");
+                TaskChainUtil.log("==> 2nd test: " + test + " = should be 1");
+            })
+            .sync(TaskChain::abort)
+            .execute((finished) -> TaskChainUtil.log("first test finished: " + finished));
+
+
+        // This chain essentially appends onto the previous one, and will not overlap
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            TaskChain<?> chain2 = factory.newSharedChain("TEST");
+            chain2
+                .sync(() -> {
+                    Object test = chain2.getTaskData("test");
+                    TaskChainUtil.log("==> 3rd test: " + test + " = should be null");
+                })
+                .delay(20)
+                .current(() -> TaskChainUtil.log("test 2nd chain 20 ticks later"))
+                .execute((finished) -> TaskChainUtil.log("second test finished: " + finished));
+
+            factory
+                .newSharedChain("TEST")
+                .async(() -> TaskChainUtil.log("==> 4th test - should print"))
+                .returnData("notthere")
+                .abortIfNull()
+                .syncLast((val) -> TaskChainUtil.log("Shouldn't execute due to null abort"))
+                .execute(() -> TaskChainUtil.log("finished runnable based test"));
+        });
+        factory
+            .newSharedChain("TEST2")
+            .delay(20 * 3)
+            .sync(() -> TaskChainUtil.log("this should run at same time as 1st test"))
+            .delay(20)
+            .async(() -> TaskChainUtil.log("this should run at same time as 2nd test"))
+            .execute((finished) -> TaskChainUtil.log("TEST2 finished: " + finished));
+        factory.newChain()
+            .asyncFirst(() -> 42)
+            .asyncLast((i) -> {
+                throw new RuntimeException("Got " + i);
+            })
+            .execute((finished) -> TaskChainUtil.log("Finished error chain: " + finished), (e, task) -> {
+                TaskChainUtil.logError("Got Exception on task " + task.getClass().getName() + ":" + e.getMessage());
+            });
+        factory
+            .newChain()
+            .sync(() -> TaskChainUtil.log("THE FIRST!"))
+            .delay(20 * 10) // Wait 20s to start any task
+            .async(() -> TaskChainUtil.log("This ran async - with no input or return"))
+            .<Integer>asyncFirstCallback(next -> {
+                // Use a callback to provide result
+                TaskChainUtil.log("this also ran async, but will call next task in 3 seconds.");
+                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> next.accept(3), 60);
+            })
+            .sync(input -> { // Will be ran 3s later but didn't use .delay()
+                TaskChainUtil.log("should of got 3: " + input);
+                return 5 + input;
+            })
+            .storeAsData("Test1")
+            .syncLast(input2 -> TaskChainUtil.log("should be 8: " + input2)) // Consumes last result, but doesn't pass a new one
+            .delay(20) // Wait 1s until next
+            .sync(() -> TaskChainUtil.log("Generic 1s later")) // no input expected, no output, run sync
+            .asyncFirst(() -> 3) // Run task async and return 3
+            .delay(5 * 20) // Wait 5s
+            .asyncLast(input1 -> TaskChainUtil.log("async last value 5s later: " + input1)) // Run async again, with value of 3
+            .<Integer>returnData("Test1")
+            .asyncLast((val) -> TaskChainUtil.log("Should of got 8 back from data: " + val))
+            .sync(TaskChain::abort)
+            .sync(() -> TaskChainUtil.log("Shouldn't be called"))
+            .execute((finished) -> TaskChainUtil.log("final test chain finished: " + finished));
+    }
+}
