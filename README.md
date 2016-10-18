@@ -18,9 +18,15 @@ Get off your dinosaur and get on this rocket ship.
   - Bukkit based Minecraft Servers (Bukkit/Spigot/Paper)
   - Sponge Minecraft Servers
 
+## Older Versions
+v2 which was based on static state can be found here: [https://gist.github.com/aikar/77f8caee3c153074c99b]
+> (note: some bugs were fixed in v3 with Shared chains done and error handlers)
+ 
+v1 which was pre Java 8 API, and completely different API design can be found here: [https://gist.github.com/aikar/9010136]
+
 
 ## License
 
-TaskChain (c) Daniel Ennis (Aikar) 2016.
+TaskChain (c) Daniel Ennis (Aikar) <aikar@aikar.co> 2016.
 
 TaskChain is licensed MIT. See [LICENSE](LICENSE)
