@@ -42,7 +42,7 @@ public class TaskChainTasks {
             return TaskChain.getCurrentChain();
         }
 
-        R run(A input) throws Exception;
+        R run(A input);
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -59,71 +59,71 @@ public class TaskChainTasks {
         }
 
         @Override
-        default R run(A input) throws Exception {
+        default R run(A input) {
             // unused
             return null;
         }
 
-        void runAsync(A input, Consumer<R> next) throws Exception;
+        void runAsync(A input, Consumer<R> next);
     }
 
     @SuppressWarnings("WeakerAccess")
     public interface FirstTask <R> extends Task<R, Object> {
         @Override
-        default R run(Object input) throws Exception {
+        default R run(Object input) {
             return run();
         }
 
-        R run() throws Exception;
+        R run();
     }
 
     @SuppressWarnings("WeakerAccess")
     public interface AsyncExecutingFirstTask<R> extends AsyncExecutingTask<R, Object> {
         @Override
-        default R run(Object input) throws Exception {
+        default R run(Object input) {
             // Unused
             return null;
         }
 
         @Override
-        default void runAsync(Object input, Consumer<R> next) throws Exception {
+        default void runAsync(Object input, Consumer<R> next) {
             run(next);
         }
 
-        void run(Consumer<R> next) throws Exception;
+        void run(Consumer<R> next);
     }
 
     @SuppressWarnings("WeakerAccess")
     public interface LastTask <A> extends Task<Object, A> {
         @Override
-        default Object run(A input) throws Exception {
+        default Object run(A input) {
             runLast(input);
             return null;
         }
-        void runLast(A input) throws Exception;
+        void runLast(A input);
     }
 
     @SuppressWarnings("WeakerAccess")
     public interface GenericTask extends Task<Object, Object> {
         @Override
-        default Object run(Object input) throws Exception {
+        default Object run(Object input) {
             runGeneric();
             return null;
         }
-        void runGeneric() throws Exception;
+        void runGeneric();
     }
 
     @SuppressWarnings("WeakerAccess")
     public interface AsyncExecutingGenericTask extends AsyncExecutingTask<Object, Object> {
         @Override
-        default Object run(Object input) throws Exception {
+        default Object run(Object input) {
             return null;
         }
         @Override
-        default void runAsync(Object input, Consumer<Object> next) throws Exception {
+        default void runAsync(Object input, Consumer<Object> next) {
             run(() -> next.accept(null));
         }
 
-        void run(Runnable next) throws Exception;
+        void run(Runnable next);
     }
 }
