@@ -32,13 +32,13 @@ package co.aikar.taskchain;
  */
 @SuppressWarnings("WeakerAccess")
 public interface TaskChainNullAction <A1, A2, A3> {
-    default void onNull(A1 arg1) {
+    default void onNull(TaskChain<?> chain, A1 arg1) {
 
     }
-    default void onNull(A1 arg1, A2 arg2) {
-        onNull(arg1);
+    default void onNull(TaskChain<?> chain, A1 arg1, A2 arg2) {
+        onNull(chain, arg1);
     }
-    default void onNull(A1 arg1, A2 arg2, A3 arg3) {
-        onNull(arg1, arg2);
+    default void onNull(TaskChain<?> chain, A1 arg1, A2 arg2, A3 arg3) {
+        onNull(chain, arg1, arg2);
     }
 }

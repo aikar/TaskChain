@@ -239,10 +239,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * Checks if the previous task return was null, and aborts if it was, optionally
-     * sending a message to the player.
-     *
-     * If not null, the previous task return will forward to the next task.
+     * {@link #abortIfNull(TaskChainNullAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
     public <A1> TaskChain<T> abortIfNull(TaskChainNullAction<A1, ?, ?> action, A1 arg1) {
@@ -250,11 +247,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * Checks if the previous task return was null, and aborts if it was, optionally
-     * sending a message to the player.
-     *
-     * If not null, the previous task return will forward to the next task.
-     * @return
+     * {@link #abortIfNull(TaskChainNullAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
     public <A1, A2> TaskChain<T> abortIfNull(TaskChainNullAction<A1, A2, ?> action, A1 arg1, A2 arg2) {
@@ -266,16 +259,13 @@ public class TaskChain <T> {
      * sending a message to the player.
      *
      * If not null, the previous task return will forward to the next task.
-     * @param object
-     * @param msg
-     * @return
      */
     @SuppressWarnings("WeakerAccess")
     public <A1, A2, A3> TaskChain<T> abortIfNull(TaskChainNullAction<A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
         return current((obj) -> {
             if (obj == null) {
                 if (action != null) {
-                    action.onNull(arg1, arg2, arg3);
+                    action.onNull(this, arg1, arg2, arg3);
                 }
                 abort();
                 return null;

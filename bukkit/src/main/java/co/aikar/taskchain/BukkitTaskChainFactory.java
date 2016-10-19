@@ -88,13 +88,13 @@ public class BukkitTaskChainFactory extends TaskChainFactory {
 
     public static final TaskChainNullAction<Player, String, ?> MESSAGE = new TaskChainNullAction<Player, String, Object>() {
         @Override
-        public void onNull(Player player, String message) {
+        public void onNull(TaskChain<?> chain, Player player, String message) {
             player.sendMessage(message);
         }
     };
     public static final TaskChainNullAction<Player, String, ?> COLOR_MESSAGE = new TaskChainNullAction<Player, String, Object>() {
         @Override
-        public void onNull(Player player, String message) {
+        public void onNull(TaskChain<?> chain, Player player, String message) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
         }
     };
