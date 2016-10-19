@@ -23,17 +23,12 @@
 
 package co.aikar.taskchain;
 
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
-
 public class TaskChainExample {
-
     /**
      * A useless example of registering multiple task signatures and states
      */
-    public static void example(Plugin plugin) {
+    public static void example(TaskChainFactory factory) {
         TaskChainUtil.log("Starting example");
-        final TaskChainFactory factory = BukkitTaskChainFactory.create(plugin);
         TaskChain<?> chain = factory.newSharedChain("TEST");
         chain
             .delay(20 * 3)
@@ -51,7 +46,7 @@ public class TaskChainExample {
 
 
         // This chain essentially appends onto the previous one, and will not overlap
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+        factory.getImplementation().postAsync(() -> {
             TaskChain<?> chain2 = factory.newSharedChain("TEST");
             chain2
                 .sync(() -> {
@@ -93,7 +88,7 @@ public class TaskChainExample {
             .<Integer>asyncFirstCallback(next -> {
                 // Use a callback to provide result
                 TaskChainUtil.log("this also ran async, but will call next task in 3 seconds.");
-                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () -> next.accept(3), 60);
+                factory.getImplementation().scheduleTask(60, () -> next.accept(3));
             })
             .sync(input -> { // Will be ran 3s later but didn't use .delay()
                 TaskChainUtil.log("should of got 3: " + input);
