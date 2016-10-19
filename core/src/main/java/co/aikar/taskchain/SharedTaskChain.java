@@ -39,22 +39,11 @@ class SharedTaskChain<R> extends TaskChain<R> {
     @Override
     public void execute(Consumer<Boolean> done, BiConsumer<Exception, Task<?, ?>> errorHandler) {
         synchronized (backingChain) {
-            // This executes SharedTaskChain.execute(Runnable), which says execute
-            // my wrapped chains queue of events, but pass a done callback for when its done.
-            // We then use the backing chain callback method to not execute the next task in the
-            // backing chain until the current one is fully done.
             backingChain.currentCallback((next) -> {
                 this.setErrorHandler(errorHandler);
                 this.setDoneCallback((finished) -> {
-                    if (done != null) {
-                        try {
-                            done.accept(finished);
-                        } catch (Exception e) {
-                            if (this.getErrorHandler() != null) {
-                                this.getErrorHandler().accept(e, null);
-                            }
-                        }
-                    }
+                    this.setDoneCallback(done);
+                    this.done(finished);
                     next.run();
                 });
                 this.execute0();
