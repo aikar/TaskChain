@@ -22,10 +22,13 @@ Dinosaurs have been dead for a long time, so get off it before you start to smel
 ## Supported Game Platforms
 ### Currently Supported
   - Bukkit based Minecraft Servers (Bukkit/Spigot/Paper)
+
 ### In Progress:
   - Sponge Minecraft Servers
+
 ### Planned
   - Forge
+
 ### Want to add your own game?
 If you wish to add support for your own game, see [Implementing a Game](wiki/implementing-a-new-game)
   
