@@ -20,14 +20,14 @@ On a serious note, Lambdas provided a much cleaner API and easier implementation
 Dinosaurs have been dead for a long time, so get off it before you start to smell.
 
 ## Supported Game Platforms
-  ### Currently Supported
+### Currently Supported
   - Bukkit based Minecraft Servers (Bukkit/Spigot/Paper)
-  ### In Progress:
+### In Progress:
   - Sponge Minecraft Servers
-  ### Planned
+### Planned
   - Forge
-  ### Want to add your own game?
-  If you wish to add support for your own game, see [Implementing a Game](wiki/implementing-a-new-game)
+### Want to add your own game?
+If you wish to add support for your own game, see [Implementing a Game](wiki/implementing-a-new-game)
   
 ## Changelog
 Please see [CHANGELOG](CHANGELOG.md)
