@@ -720,6 +720,7 @@ public class TaskChain <T> {
             final Object arg = this.chain.previous;
             this.chain.previous = null;
             final R res;
+            final TaskChain<?> prevChain = currentChain.get();
             try {
                 currentChain.set(this.chain);
                 if (this.task instanceof AsyncExecutingTask) {
@@ -738,7 +739,11 @@ public class TaskChain <T> {
                 this.chain.handleError(e, this.task);
                 this.abort();
             } finally {
-                currentChain.remove();
+                if (prevChain != null) {
+                    currentChain.set(prevChain);
+                } else {
+                    currentChain.remove();
+                }
             }
         }
 
