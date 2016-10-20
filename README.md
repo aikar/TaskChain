@@ -10,14 +10,14 @@ TaskChain then executes your task pipe line, switching thread context where need
 
 
 ## Documentation / Getting Started
-1. [Why you should use TaskChain](/aikar/TaskChain/wiki/why-taskchain)
-2. [Learning TaskChain Terminology](/aikar/TaskChain/wiki/taskchain-terminology)
-3. [Using TaskChains](/aikar/TaskChain/wiki/usage)
-4. [TaskChain Usage Examples](/aikar/TaskChain/wiki/examples)
+1. [Why you should use TaskChain](https://github.com/aikar/TaskChain/wiki/why-taskchain)
+2. [Learning TaskChain Terminology](https://github.com/aikar/TaskChain/wiki/taskchain-terminology)
+3. [Using TaskChains](https://github.com/aikar/TaskChain/wiki/usage)
+4. [TaskChain Usage Examples](https://github.com/aikar/TaskChain/wiki/examples)
 5. Integrating with Games
-  * [Bukkit/Spigot/Paper (Minecraft)](/aikar/TaskChain/wiki/implementing-bukkit)
+  * [Bukkit/Spigot/Paper (Minecraft)](https://github.com/aikar/TaskChain/wiki/implementing-bukkit)
   * [Sponge (Minecraft)](#implementing-sponge) (Not done yet)
-  * [Implementing a new game](/aikar/TaskChain/wiki/implementing-a-new-game)
+  * [Implementing a new game](https://github.com/aikar/TaskChain/wiki/implementing-a-new-game)
 
 ## Why does it require Java 8+?
 Get off your dinosaur and get on this rocket ship!
