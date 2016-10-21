@@ -14,10 +14,7 @@ TaskChain then executes your task pipe line, switching thread context where need
 2. [Learning TaskChain Terminology](https://github.com/aikar/TaskChain/wiki/taskchain-terminology)
 3. [Using TaskChains](https://github.com/aikar/TaskChain/wiki/usage)
 4. [TaskChain Usage Examples](https://github.com/aikar/TaskChain/wiki/examples)
-5. Integrating with Games
-  * [Bukkit/Spigot/Paper (Minecraft)](https://github.com/aikar/TaskChain/wiki/implementing-bukkit)
-  * [Sponge (Minecraft)](#implementing-sponge) (Not done yet)
-  * [Implementing a new game](https://github.com/aikar/TaskChain/wiki/implementing-a-new-game)
+  
 
 ## Why does it require Java 8+?
 Get off your dinosaur and get on this rocket ship!
@@ -26,27 +23,31 @@ On a serious note, Lambdas provided a much cleaner API and easier implementation
 
 Dinosaurs have been dead for a long time, so get off it before you start to smell.
 
+[Download Java 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+
 ## Supported Game Platforms
 ### Currently Supported
-  - Bukkit based Minecraft Servers (Bukkit/Spigot/Paper)
+  - Bukkit based Minecraft Servers (Bukkit/Spigot/Paper)  
+  [[GUIDE: Using in your Plugins](https://github.com/aikar/TaskChain/wiki/implementing-bukkit)]
+  
 
 ### In Progress:
-  - Sponge Minecraft Servers
+  - Sponge Minecraft Servers [[#1](https://github.com/aikar/TaskChain/issues/1)]
 
 ### Planned
-  - Forge
+  - Forge Minecraft Servers [[#2](https://github.com/aikar/TaskChain/issues/2)]
 
 ### Want to add your own game?
-If you wish to add support for your own game, see [Implementing a Game](wiki/implementing-a-new-game)
+If you wish to add support for your own game, see [Implementing a new game](https://github.com/aikar/TaskChain/wiki/implementing-a-new-game)
   
 ## Changelog
 Please see [CHANGELOG](CHANGELOG.md)
 
 ## Older Versions
-v2 which was based on static state can be found here: [https://gist.github.com/aikar/77f8caee3c153074c99b]
-> (note: some bugs were fixed in v3 with Shared chains done and error handlers)
+ * [v2](https://gist.github.com/aikar/77f8caee3c153074c99b): Updated to a Java 8 Lambda API. Massive redesign and new features. Very close to v3 but uses a static registration and global state, so it can only be bound to a single Bukkit Plugin    
+ (note: some bugs were fixed in v3 with Shared chains done and error handlers)
  
-v1 which was pre Java 8 API, and completely different API design can be found here: [https://gist.github.com/aikar/9010136]
+ * [v1](https://gist.github.com/aikar/9010136): The original (ugly) API for Bukkit plugins, pre Java 8. Only version usable below java 8, but probably some bugs.
 
 
 ## License
