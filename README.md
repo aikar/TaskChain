@@ -1,4 +1,4 @@
-# TaskChain
+# TaskChain - Version: 3.0.0
 ## What is TaskChain?
 TaskChain is a Java Control Flow framework designed for Game Developers. 
 
@@ -8,22 +8,10 @@ You define a series of tasks (a Task Pipeline) in the order that they should exe
 
 TaskChain then executes your task pipe line, switching thread context where needed, passing the result from the previous task to the next.
 
-
 ## Documentation / Getting Started
 1. [Why you should use TaskChain](https://github.com/aikar/TaskChain/wiki/why-taskchain)
 2. [Learning TaskChain Terminology](https://github.com/aikar/TaskChain/wiki/taskchain-terminology)
-3. [Using TaskChains](https://github.com/aikar/TaskChain/wiki/usage)
-4. [TaskChain Usage Examples](https://github.com/aikar/TaskChain/wiki/examples)
-  
-
-## Why does it require Java 8+?
-Get off your dinosaur and get on this rocket ship!
-
-On a serious note, Lambdas provided a much cleaner API and easier implementations.
-
-Dinosaurs have been dead for a long time, so get off it before you start to smell.
-
-[Download Java 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+3. [Using TaskChains & Examples](https://github.com/aikar/TaskChain/wiki/usage)
 
 ## Supported Game Platforms
 ### Currently Supported
@@ -39,9 +27,18 @@ Dinosaurs have been dead for a long time, so get off it before you start to smel
 
 ### Want to add your own game?
 If you wish to add support for your own game, see [Implementing a new game](https://github.com/aikar/TaskChain/wiki/implementing-a-new-game)
-  
+
 ## Changelog
 Please see [CHANGELOG](CHANGELOG.md)
+
+## Why does it require Java 8+?
+Get off your dinosaur and get on this rocket ship!
+
+On a serious note, Lambdas provided a much cleaner API and easier implementations.
+
+Dinosaurs have been dead for a long time, so get off it before you start to smell.
+
+[Download Java 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 
 ## Older Versions
  * [v2](https://gist.github.com/aikar/77f8caee3c153074c99b): Updated to a Java 8 Lambda API. Massive redesign and new features. Very close to v3 but uses a static registration and global state, so it can only be bound to a single Bukkit Plugin    
