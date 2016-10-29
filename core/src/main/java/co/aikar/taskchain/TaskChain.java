@@ -120,10 +120,10 @@ public class TaskChain <T> {
     }
 
     /**
-     * Usable only inside of an executing Task.
+     * Usable only inside of an executing Task or Chain Error/Done handlers
      *
-     * Gets the current chain that is executing this task. This method should only be called on the same thread
-     * that is executing the task.
+     * Gets the current chain that is executing this Task or Error/Done handler
+     * This method should only be called on the same thread that is executing the method.
      *
      * In an AsyncExecutingTask, You must call this method BEFORE passing control to another thread.
      */
@@ -261,7 +261,16 @@ public class TaskChain <T> {
         return current((obj) -> {
             if (obj == null) {
                 if (action != null) {
-                    action.onNull(this, arg1, arg2, arg3);
+                    final TaskChain<?> prev = currentChain.get();
+                    try {
+                        currentChain.set(this);
+                        action.onNull(this, arg1, arg2, arg3);
+                    } catch (Exception e) {
+                        TaskChainUtil.logError("TaskChain Exception in Null Action handler: " + action.getClass().getName());
+                        e.printStackTrace();
+                    } finally {
+                        currentChain.set(prev);
+                    }
                 }
                 abort();
                 return null;
@@ -614,10 +623,14 @@ public class TaskChain <T> {
             factory.removeSharedChain(this.sharedName);
         }
         if (this.doneCallback != null) {
+            final TaskChain<?> prev = currentChain.get();
             try {
+                currentChain.set(this);
                 this.doneCallback.accept(finished);
             } catch (Exception e) {
                 this.handleError(e, null);
+            } finally {
+                currentChain.set(prev);
             }
         }
     }
@@ -678,11 +691,15 @@ public class TaskChain <T> {
 
     private void handleError(Exception e, Task<?, ?> task) {
         if (errorHandler != null) {
+            final TaskChain<?> prev = currentChain.get();
             try {
+                currentChain.set(this);
                 errorHandler.accept(e, task);
             } catch (Exception e2) {
                 TaskChainUtil.logError("TaskChain Exception in the error handler! ");
                 e.printStackTrace();
+            } finally {
+                currentChain.set(prev);
             }
         } else {
             TaskChainUtil.logError("TaskChain Exception on " + (task != null ? task.getClass().getName() : "Done Hander"));
