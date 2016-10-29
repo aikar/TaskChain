@@ -25,26 +25,22 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>co.aikar</groupId>
     <artifactId>taskchain-parent</artifactId>
-    <version>parent-1.0</version>
+    <version><!--VERSION-->3.0.1<!--VERSION--></version>
     <packaging>pom</packaging>
     <name>TaskChain (All)</name>
     <url>https://taskchain.emc.gs</url>
 
-    <properties>
-        <taskchain-version>3.0.1-SNAPSHOT</taskchain-version>
-    </properties>
-
     <distributionManagement>
         <repository>
             <id>aikar</id>
-            <url>http://ci.emc.gs/nexus/content/repositories/aikar</url>
+            <url>http://ci.emc.gs/nexus/content/repositories/aikar/</url>
         </repository>
     </distributionManagement>
 
     <repositories>
         <repository>
             <id>aikar</id>
-            <url>http://ci.emc.gs/nexus/content/groups/aikar/</url>
+            <url>http://ci.emc.gs/nexus/content/repositories/aikar/</url>
         </repository>
     </repositories>
 

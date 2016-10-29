@@ -1,5 +1,8 @@
 # TaskChain Changelog
 
+## Version 3.0.1
+* No changes. Version bump as I appear to of accidentally deployed the parent POM using 3.0.1-SNAPSHOT
+
 ## Version 3.0.0
 * First release as a proper GitHub Project
 * TaskChain API is now platform agnostic
