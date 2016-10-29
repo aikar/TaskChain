@@ -4,9 +4,15 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 ver=$1
+function updateVersion {
+    sed -i -e "s/<!--VERSION-->.*\?<!--VERSION-->/<!--VERSION-->$ver<!--VERSION-->/g" $1
+}
 
-
-files=(*/pom.xml pom.xml README.md)
+files=(*/pom.xml pom.xml)
 for f in "${files[@]}"; do
-    sed -i -e "s/<!--VERSION-->.*\?<!--VERSION-->/<!--VERSION-->$ver<!--VERSION-->/g" $f
+	updateVersion $f
 done
+
+if [[ "$ver" != *-SNAPSHOT ]]; then
+	updateVersion README.md
+fi
