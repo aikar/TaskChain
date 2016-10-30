@@ -76,6 +76,8 @@ public class TaskChain <T> {
 
     private boolean executed = false;
     private boolean async;
+    private int actionIndex;
+    private int currentActionIndex;
     boolean done = false;
 
     private Object previous;
@@ -97,15 +99,37 @@ public class TaskChain <T> {
     /* ======================================================================================== */
     // <editor-fold desc="// Getters & Setters">
 
-    void setDoneCallback(Consumer<Boolean> doneCallback) {
+    /**
+     * Called in an executing task, get the current action index.
+     * For every action that adds a task to the chain, the action index is increased.
+     *
+     * Useful in error or done handlers to know where you are in the chain when it aborted or threw exception.
+     * @return The current index
+     */
+    public int getCurrentActionIndex() {
+        return currentActionIndex;
+    }
+
+    /**
+     * Changes the done callback handler for this chain
+     * @param doneCallback
+     */
+    public void setDoneCallback(Consumer<Boolean> doneCallback) {
         this.doneCallback = doneCallback;
     }
 
-    BiConsumer<Exception, Task<?, ?>> getErrorHandler() {
+    /**
+     * @return The current error handler or null
+     */
+    public BiConsumer<Exception, Task<?, ?>> getErrorHandler() {
         return errorHandler;
     }
 
-    void setErrorHandler(BiConsumer<Exception, Task<?, ?>> errorHandler) {
+    /**
+     * Changes the error handler for this chain
+     * @param errorHandler
+     */
+    public void setErrorHandler(BiConsumer<Exception, Task<?, ?>> errorHandler) {
         this.errorHandler = errorHandler;
     }
     // </editor-fold>
@@ -723,8 +747,10 @@ public class TaskChain <T> {
 
         private boolean executed = false;
         private boolean aborted = false;
+        private final int actionIndex;
 
         private TaskHolder(TaskChain<?> chain, Boolean async, Task<R, A> task) {
+            this.actionIndex = TaskChain.this.actionIndex++;
             this.task = task;
             this.chain = chain;
             this.async = async;
@@ -736,6 +762,7 @@ public class TaskChain <T> {
         private void run() {
             final Object arg = this.chain.previous;
             this.chain.previous = null;
+            TaskChain.this.currentActionIndex = this.actionIndex;
             final R res;
             final TaskChain<?> prevChain = currentChain.get();
             try {
