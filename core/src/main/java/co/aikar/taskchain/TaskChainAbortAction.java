@@ -31,12 +31,12 @@ package co.aikar.taskchain;
  * @param <A3>
  */
 @SuppressWarnings("WeakerAccess")
-public interface TaskChainAbortAction <T, A1, A2, A3> {
-    default void onAbort(TaskChain<?> chain, T response, A1 arg1) {}
-    default void onAbort(TaskChain<?> chain, T response, A1 arg1, A2 arg2) {
-        onAbort(chain, response, arg1);
+public interface TaskChainAbortAction <A1, A2, A3> {
+    default void onAbort(TaskChain<?> chain, A1 arg1) {}
+    default void onAbort(TaskChain<?> chain, A1 arg1, A2 arg2) {
+        onAbort(chain, arg1);
     }
-    default void onAbort(TaskChain<?> chain, T response, A1 arg1, A2 arg2, A3 arg3) {
-        onAbort(chain, response, arg1, arg2);
+    default void onAbort(TaskChain<?> chain, A1 arg1, A2 arg2, A3 arg3) {
+        onAbort(chain, arg1, arg2);
     }
 }

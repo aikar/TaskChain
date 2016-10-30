@@ -33,7 +33,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.concurrent.TimeUnit;
 
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class BukkitTaskChainFactory extends TaskChainFactory {
     private BukkitTaskChainFactory(Plugin plugin) {
         super(new BukkitGameInterface(plugin));
@@ -86,15 +86,15 @@ public class BukkitTaskChainFactory extends TaskChainFactory {
         }
     }
 
-    public static final TaskChainAbortAction<Object, Player, String, ?> MESSAGE = new TaskChainAbortAction<Object, Player, String, Object>() {
+    public static final TaskChainAbortAction<Player, String, ?> MESSAGE = new TaskChainAbortAction<Player, String, Object>() {
         @Override
-        public void onAbort(TaskChain<?> chain, Object prevValue, Player player, String message) {
+        public void onAbort(TaskChain<?> chain, Player player, String message) {
             player.sendMessage(message);
         }
     };
-    public static final TaskChainAbortAction<Object, Player, String, ?> COLOR_MESSAGE = new TaskChainAbortAction<Object, Player, String, Object>() {
+    public static final TaskChainAbortAction<Player, String, ?> COLOR_MESSAGE = new TaskChainAbortAction<Player, String, Object>() {
         @Override
-        public void onAbort(TaskChain<?> chain, Object prevValue, Player player, String message) {
+        public void onAbort(TaskChain<?> chain, Player player, String message) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
         }
     };

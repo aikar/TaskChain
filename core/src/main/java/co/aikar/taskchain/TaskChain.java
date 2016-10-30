@@ -259,7 +259,7 @@ public class TaskChain <T> {
      * {@link #abortIf(T, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<T> abortIfNull(TaskChainAbortAction<T, ?, ?, ?> action) {
+    public TaskChain<T> abortIfNull(TaskChainAbortAction<?, ?, ?> action) {
         return abortIf(null, action, null, null, null);
     }
 
@@ -267,7 +267,7 @@ public class TaskChain <T> {
      * {@link #abortIf(T, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
-    public <A1> TaskChain<T> abortIfNull(TaskChainAbortAction<T, A1, ?, ?> action, A1 arg1) {
+    public <A1> TaskChain<T> abortIfNull(TaskChainAbortAction<A1, ?, ?> action, A1 arg1) {
         //noinspection unchecked
         return abortIf(null, action, arg1, null, null);
     }
@@ -276,7 +276,7 @@ public class TaskChain <T> {
      * {@link #abortIf(T, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
-    public <A1, A2> TaskChain<T> abortIfNull(TaskChainAbortAction<T, A1, A2, ?> action, A1 arg1, A2 arg2) {
+    public <A1, A2> TaskChain<T> abortIfNull(TaskChainAbortAction<A1, A2, ?> action, A1 arg1, A2 arg2) {
         //noinspection unchecked
         return abortIf(null, action, arg1, arg2, null);
     }
@@ -288,7 +288,7 @@ public class TaskChain <T> {
      * If not null, the previous task return will forward to the next task.
      */
     @SuppressWarnings("WeakerAccess")
-    public <A1, A2, A3> TaskChain<T> abortIfNull(TaskChainAbortAction<T, A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
+    public <A1, A2, A3> TaskChain<T> abortIfNull(TaskChainAbortAction<A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
         //noinspection unchecked
         return abortIf(null, action, arg1, arg2, arg3);
     }
@@ -307,7 +307,7 @@ public class TaskChain <T> {
      * {@link #abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<T, ?, ?, ?> action) {
+    public TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<?, ?, ?> action) {
         return abortIf(ifObj, action, null, null, null);
     }
 
@@ -315,7 +315,7 @@ public class TaskChain <T> {
      * {@link #abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
-    public <A1> TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<T, A1, ?, ?> action, A1 arg1) {
+    public <A1> TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<A1, ?, ?> action, A1 arg1) {
         return abortIf(ifObj, action, arg1, null, null);
     }
 
@@ -323,7 +323,7 @@ public class TaskChain <T> {
      * {@link #abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
-    public <A1, A2> TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<T, A1, A2, ?> action, A1 arg1, A2 arg2) {
+    public <A1, A2> TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<A1, A2, ?> action, A1 arg1, A2 arg2) {
         return abortIf(ifObj, action, arg1, arg2, null);
     }
 
@@ -334,10 +334,10 @@ public class TaskChain <T> {
      * If not null, the previous task return will forward to the next task.
      */
     @SuppressWarnings("WeakerAccess")
-    public <A1, A2, A3> TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<T, A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
+    public <A1, A2, A3> TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
         return current((obj) -> {
             if (Objects.equals(obj, ifObj)) {
-                handleAbortAction(action, arg1, arg2, arg3, obj);
+                handleAbortAction(action, arg1, arg2, arg3);
                 return null;
             }
             return obj;
@@ -358,7 +358,7 @@ public class TaskChain <T> {
      * {@link #abortIfNot(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<T, ?, ?, ?> action) {
+    public TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<?, ?, ?> action) {
         return abortIfNot(ifNotObj, action, null, null, null);
     }
 
@@ -366,7 +366,7 @@ public class TaskChain <T> {
      * {@link #abortIfNot(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
-    public <A1> TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<T, A1, ?, ?> action, A1 arg1) {
+    public <A1> TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<A1, ?, ?> action, A1 arg1) {
         return abortIfNot(ifNotObj, action, arg1, null, null);
     }
 
@@ -374,7 +374,7 @@ public class TaskChain <T> {
      * {@link #abortIfNot(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
-    public <A1, A2> TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<T, A1, A2, ?> action, A1 arg1, A2 arg2) {
+    public <A1, A2> TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<A1, A2, ?> action, A1 arg1, A2 arg2) {
         return abortIfNot(ifNotObj, action, arg1, arg2, null);
     }
 
@@ -385,10 +385,10 @@ public class TaskChain <T> {
      * If not null, the previous task return will forward to the next task.
      */
     @SuppressWarnings("WeakerAccess")
-    public <A1, A2, A3> TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<T, A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
+    public <A1, A2, A3> TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
         return current((obj) -> {
             if (!Objects.equals(obj, ifNotObj)) {
-                handleAbortAction(action, arg1, arg2, arg3, obj);
+                handleAbortAction(action, arg1, arg2, arg3);
                 return null;
             }
             return obj;
@@ -722,12 +722,12 @@ public class TaskChain <T> {
     // </editor-fold>
     /* ======================================================================================== */
     //<editor-fold desc="// Implementation Details">
-    private <A1, A2, A3> void handleAbortAction(TaskChainAbortAction<T, A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3, T obj) {
+    private <A1, A2, A3> void handleAbortAction(TaskChainAbortAction<A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
         if (action != null) {
             final TaskChain<?> prev = currentChain.get();
             try {
                 currentChain.set(this);
-                action.onAbort(this, obj, arg1, arg2, arg3);
+                action.onAbort(this, arg1, arg2, arg3);
             } catch (Exception e) {
                 TaskChainUtil.logError("TaskChain Exception in Abort Action handler: " + action.getClass().getName());
                 TaskChainUtil.logError("Current Action Index was: " + currentActionIndex);

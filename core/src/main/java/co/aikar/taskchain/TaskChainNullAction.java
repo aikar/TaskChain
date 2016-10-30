@@ -34,7 +34,7 @@ package co.aikar.taskchain;
  */
 @SuppressWarnings("WeakerAccess")
 @Deprecated
-public interface TaskChainNullAction <A1, A2, A3> extends TaskChainAbortAction<Object, A1, A2, A3> {
+public interface TaskChainNullAction <A1, A2, A3> extends TaskChainAbortAction<A1, A2, A3> {
     default void onNull(TaskChain<?> chain, A1 arg1) {}
     default void onNull(TaskChain<?> chain, A1 arg1, A2 arg2) {
         onNull(chain, arg1);
@@ -44,17 +44,17 @@ public interface TaskChainNullAction <A1, A2, A3> extends TaskChainAbortAction<O
     }
 
     @Override
-    default void onAbort(TaskChain<?> chain, Object response, A1 arg1) {
+    default void onAbort(TaskChain<?> chain, A1 arg1) {
         onNull(chain, arg1);
     }
 
     @Override
-    default void onAbort(TaskChain<?> chain, Object response, A1 arg1, A2 arg2) {
+    default void onAbort(TaskChain<?> chain, A1 arg1, A2 arg2) {
         onNull(chain, arg1, arg2);
     }
 
     @Override
-    default void onAbort(TaskChain<?> chain, Object response, A1 arg1, A2 arg2, A3 arg3) {
+    default void onAbort(TaskChain<?> chain, A1 arg1, A2 arg2, A3 arg3) {
         onNull(chain, arg1, arg2, arg3);
     }
 }
