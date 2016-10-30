@@ -103,7 +103,8 @@ public class TaskChainExample {
             .asyncLast(input1 -> TaskChainUtil.log("async last value 5s later: " + input1)) // Run async again, with value of 3
             .<Integer>returnData("Test1")
             .asyncLast((val) -> TaskChainUtil.log("Should of got 8 back from data: " + val))
-            .sync(TaskChain::abort)
+            .<Integer>returnData("Test1")
+            .abortIf(8)
             .sync(() -> TaskChainUtil.log("Shouldn't be called"))
             .execute((finished) -> TaskChainUtil.log("final test chain finished: " + finished));
     }

@@ -26,35 +26,17 @@ package co.aikar.taskchain;
 /**
  * Defines actions to perform when a chain is used with .abortIfNull
  * Override desired arguments needed to provide actions
- *
- * @deprecated Use {@link TaskChainAbortAction} instead
  * @param <A1>
  * @param <A2>
  * @param <A3>
  */
 @SuppressWarnings("WeakerAccess")
-@Deprecated
-public interface TaskChainNullAction <A1, A2, A3> extends TaskChainAbortAction<Object, A1, A2, A3> {
-    default void onNull(TaskChain<?> chain, A1 arg1) {}
-    default void onNull(TaskChain<?> chain, A1 arg1, A2 arg2) {
-        onNull(chain, arg1);
+public interface TaskChainAbortAction <T, A1, A2, A3> {
+    default void onAbort(TaskChain<?> chain, T response, A1 arg1) {}
+    default void onAbort(TaskChain<?> chain, T response, A1 arg1, A2 arg2) {
+        onAbort(chain, response, arg1);
     }
-    default void onNull(TaskChain<?> chain, A1 arg1, A2 arg2, A3 arg3) {
-        onNull(chain, arg1, arg2);
-    }
-
-    @Override
-    default void onAbort(TaskChain<?> chain, Object response, A1 arg1) {
-        onNull(chain, arg1);
-    }
-
-    @Override
-    default void onAbort(TaskChain<?> chain, Object response, A1 arg1, A2 arg2) {
-        onNull(chain, arg1, arg2);
-    }
-
-    @Override
-    default void onAbort(TaskChain<?> chain, Object response, A1 arg1, A2 arg2, A3 arg3) {
-        onNull(chain, arg1, arg2, arg3);
+    default void onAbort(TaskChain<?> chain, T response, A1 arg1, A2 arg2, A3 arg3) {
+        onAbort(chain, response, arg1, arg2);
     }
 }

@@ -86,15 +86,15 @@ public class BukkitTaskChainFactory extends TaskChainFactory {
         }
     }
 
-    public static final TaskChainNullAction<Player, String, ?> MESSAGE = new TaskChainNullAction<Player, String, Object>() {
+    public static final TaskChainAbortAction<?, Player, String, ?> MESSAGE = new TaskChainAbortAction<Object, Player, String, Object>() {
         @Override
-        public void onNull(TaskChain<?> chain, Player player, String message) {
+        public void onAbort(TaskChain<?> chain, Object prevValue, Player player, String message) {
             player.sendMessage(message);
         }
     };
-    public static final TaskChainNullAction<Player, String, ?> COLOR_MESSAGE = new TaskChainNullAction<Player, String, Object>() {
+    public static final TaskChainAbortAction<?, Player, String, ?> COLOR_MESSAGE = new TaskChainAbortAction<Object, Player, String, Object>() {
         @Override
-        public void onNull(TaskChain<?> chain, Player player, String message) {
+        public void onAbort(TaskChain<?> chain, Object prevValue, Player player, String message) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
         }
     };
