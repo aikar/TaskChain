@@ -8,7 +8,7 @@ version=$1
 
 a=( ${version//./ } )
 ((a[2]++))
-files=(*/pom.xml pom.xml README.md)
+files=(*/pom.xml pom.xml README.md CHANGELOG.md)
 
 
 next="${a[0]}.${a[1]}.${a[2]}-SNAPSHOT"
