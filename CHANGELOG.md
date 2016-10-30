@@ -1,4 +1,9 @@
 # TaskChain Changelog
+## Version 3.1.0
+* TaskChain.getCurrentChain() now works in other user supplied methods such as Error Handlers, Done Handlers and Null Action Handlers. 
+* User supplied methods such as those handlers should now properly catch all exceptions and avoid ever corrupting the chain processing (mainly for shared chains, as an error in your error handler on a shared chain could break the backing chain and prevent other chains from running)
+* Add TaskChain.getCurrentActionIndex() API. Pretty much every thing you add to the chain will bump the action index, so you may use this value in your error/done handlers to know how far down the chain you were when it aborted, and make judgement there.
+* Getters and Setters for Error and Done handlers were made public so you can change those if you really see a reason to mid execution.
 
 ## Version 3.0.1
 * No changes. Version bump as I appear to of accidentally deployed the parent POM using 3.0.1-SNAPSHOT
