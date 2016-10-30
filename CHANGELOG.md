@@ -1,5 +1,8 @@
 # TaskChain Changelog
 
+## Version 3.3.3
+* Fix POM files for dependencies to create the dependency reduced POM files to avoid double including in shade.
+
 ## Version 3.3.2
 * Add abortIf() and .abortIfNot() API's. These behave like abortIfNull but allow you to check for a certain value.
 * AbortAction interface was created to replace NullAction handlers, and TaskChainNullAction is now Deprecated
