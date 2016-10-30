@@ -12,6 +12,7 @@ TaskChain then executes your task pipe line, switching thread context where need
 1. [Why you should use TaskChain](https://github.com/aikar/TaskChain/wiki/why-taskchain)
 2. [Learning TaskChain Terminology](https://github.com/aikar/TaskChain/wiki/taskchain-terminology)
 3. [Using TaskChains & Examples](https://github.com/aikar/TaskChain/wiki/usage)
+4. [Shared Task Chains](https://github.com/aikar/TaskChain/wiki/Shared-Task-Chains)
 
 ## Supported Game Platforms
 ### Currently Supported
