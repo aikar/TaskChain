@@ -1,8 +1,6 @@
 # TaskChain Changelog
-## Version 3.3.1
-* Fix signature of Bukkit Action handlers
 
-## Version 3.3.0
+## Version 3.3.2
 * Add abortIf() and .abortIfNot() API's. These behave like abortIfNull but allow you to check for a certain value.
 * AbortAction interface was created to replace NullAction handlers, and TaskChainNullAction is now Deprecated
 
