@@ -1,4 +1,7 @@
 # TaskChain Changelog
+## Version 3.2.0
+* Ability to set a default error handler on a Factory for all chains created by the factory to default to if they do not supply their own.
+
 ## Version 3.1.0
 * TaskChain.getCurrentChain() now works in other user supplied methods such as Error Handlers, Done Handlers and Null Action Handlers. 
 * User supplied methods such as those handlers should now properly catch all exceptions and avoid ever corrupting the chain processing (mainly for shared chains, as an error in your error handler on a shared chain could break the backing chain and prevent other chains from running)
