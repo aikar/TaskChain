@@ -620,6 +620,9 @@ public class TaskChain <T> {
      * @param errorHandler The Error handler to handle exceptions
      */
     public void execute(Consumer<Boolean> done, BiConsumer<Exception, Task<?, ?>> errorHandler) {
+        if (errorHandler == null) {
+            errorHandler = factory.getDefaultErrorHandler();
+        }
         this.doneCallback = done;
         this.errorHandler = errorHandler;
         execute0();

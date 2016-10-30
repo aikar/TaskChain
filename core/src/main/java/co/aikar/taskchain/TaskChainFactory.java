@@ -26,11 +26,14 @@ package co.aikar.taskchain;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class TaskChainFactory {
     private final GameInterface impl;
     private final AsyncQueue asyncQueue;
     private final Map<String, TaskChain<?>> sharedChains = new HashMap<>();
+    volatile private BiConsumer<Exception, TaskChainTasks.Task<?, ?>> defaultErrorHandler;
     volatile boolean shutdown = false;
 
     @SuppressWarnings("WeakerAccess")
@@ -42,7 +45,6 @@ public class TaskChainFactory {
 
     /**
      * Creates a new chain.
-     * @return
      */
     public <T> TaskChain<T> newChain() {
         return new TaskChain<>(this);
@@ -59,9 +61,7 @@ public class TaskChainFactory {
      *
      * If 2 chains are created at same time under same name, the first chain will execute fully before the 2nd chain will start, no matter how long
      *
-     * @param name
-     * @param <T>
-     * @return
+     * @param name Name of the shared chain. Case sensitive
      */
     public synchronized <T> TaskChain<T> newSharedChain(String name) {
         TaskChain<?> chain;
@@ -69,7 +69,7 @@ public class TaskChainFactory {
             chain = sharedChains.get(name);
 
             if (chain != null) {
-                //noinspection NestedSynchronizedStatement
+                //noinspection NestedSynchronizedStatement,SynchronizationOnLocalVariableOrMethodParameter
                 synchronized (chain) {
                     if (chain.done) {
                         chain = null;
@@ -83,13 +83,32 @@ public class TaskChainFactory {
             }
         }
 
+        //noinspection unchecked
         return new SharedTaskChain<>(this, (TaskChain<T>) chain);
     }
 
     /**
+     * Returns the default error handler that will be used by all chains created by this factory,
+     * if they do not suspply their own error handler.
+     * @return The current default error handler
+     */
+    public BiConsumer<Exception, TaskChainTasks.Task<?, ?>> getDefaultErrorHandler() {
+        return defaultErrorHandler;
+    }
+
+    /**
+     * Sets the default error handler used for all chains created by this factory,
+     * if they do not supply their own error handler.
+     * @param errorHandler The error handler
+     */
+    public void setDefaultErrorHandler(BiConsumer<Exception, TaskChainTasks.Task<?, ?>> errorHandler) {
+        this.defaultErrorHandler = errorHandler;
+    }
+
+    /**
      * Shuts down the TaskChain system, forcing all tasks to run on current threads and finish.
-     * @param duration
-     * @param units
+     * @param duration How long in the supplied units to wait before giving up the shutdown.
+     * @param units The units for how long to wait before giving up the shutdown
      */
     public void shutdown(int duration, TimeUnit units) {
         shutdown = true;
