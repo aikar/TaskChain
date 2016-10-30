@@ -1,4 +1,8 @@
 # TaskChain Changelog
+## Version 3.3.0
+* Add abortIf() and .abortIfNot() API's. These behave like abortIfNull but allow you to check for a certain value.
+* AbortAction interface was created to replace NullAction handlers, and TaskChainNullAction is now Deprecated
+
 ## Version 3.2.0
 * Ability to set a default error handler on a Factory for all chains created by the factory to default to if they do not supply their own.
 
