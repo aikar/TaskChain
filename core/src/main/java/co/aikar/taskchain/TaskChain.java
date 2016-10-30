@@ -291,6 +291,7 @@ public class TaskChain <T> {
                         action.onNull(this, arg1, arg2, arg3);
                     } catch (Exception e) {
                         TaskChainUtil.logError("TaskChain Exception in Null Action handler: " + action.getClass().getName());
+                        TaskChainUtil.logError("Current Action Index was: " + currentActionIndex);
                         e.printStackTrace();
                     } finally {
                         currentChain.set(prev);
@@ -720,13 +721,15 @@ public class TaskChain <T> {
                 currentChain.set(this);
                 errorHandler.accept(e, task);
             } catch (Exception e2) {
-                TaskChainUtil.logError("TaskChain Exception in the error handler! ");
+                TaskChainUtil.logError("TaskChain Exception in the error handler!" + e2.getMessage());
+                TaskChainUtil.logError("Current Action Index was: " + currentActionIndex);
                 e.printStackTrace();
             } finally {
                 currentChain.set(prev);
             }
         } else {
-            TaskChainUtil.logError("TaskChain Exception on " + (task != null ? task.getClass().getName() : "Done Hander"));
+            TaskChainUtil.logError("TaskChain Exception on " + (task != null ? task.getClass().getName() : "Done Hander") + ": " + e.getMessage());
+            TaskChainUtil.logError("Current Action Index was: " + currentActionIndex);
             e.printStackTrace();
         }
     }
