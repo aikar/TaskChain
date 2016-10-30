@@ -25,7 +25,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>co.aikar</groupId>
     <artifactId>taskchain-parent</artifactId>
-    <version><!--VERSION-->3.3.0<!--VERSION--></version>
+    <version><!--VERSION-->3.3.1-SNAPSHOT<!--VERSION--></version>
     <packaging>pom</packaging>
     <name>TaskChain (All)</name>
     <url>https://taskchain.emc.gs</url>
