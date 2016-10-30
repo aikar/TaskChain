@@ -9,7 +9,6 @@ version=$1
 a=( ${version//./ } )
 ((a[2]++))
 files=(*/pom.xml pom.xml README.md)
-files=${files[@]}
 
 
 next="${a[0]}.${a[1]}.${a[2]}-SNAPSHOT"
@@ -17,10 +16,10 @@ next="${a[0]}.${a[1]}.${a[2]}-SNAPSHOT"
 ./version.sh "$version"
 mvn clean deploy || (echo "Something went wrong with compile, aborting" ; exit 1)
 
-git commit -m "Release $version" "$files"
+git commit -m "Release $version" ${files[@]}
 git tag -a -m "$version" $version
 
 ./version.sh "$next"
-git commit -m "Prepare for development $next" "$files"
+git commit -m "Prepare for development $next" ${files[@]}
 git push --tags origin master
 
