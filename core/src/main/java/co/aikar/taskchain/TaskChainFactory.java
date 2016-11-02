@@ -25,6 +25,7 @@ package co.aikar.taskchain;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
@@ -32,7 +33,7 @@ import java.util.function.BiConsumer;
 public class TaskChainFactory {
     private final GameInterface impl;
     private final AsyncQueue asyncQueue;
-    private final Map<String, TaskChain<?>> sharedChains = new HashMap<>();
+    private final Map<String, Queue<SharedTaskChain>> sharedChains = new HashMap<>();
     volatile private BiConsumer<Exception, TaskChainTasks.Task<?, ?>> defaultErrorHandler;
     volatile boolean shutdown = false;
 
@@ -41,6 +42,14 @@ public class TaskChainFactory {
         this.impl = impl;
         this.asyncQueue = impl.getAsyncQueue();
         impl.registerShutdownHandler(this);
+    }
+
+    GameInterface getImplementation() {
+        return impl;
+    }
+
+    public Map<String, Queue<SharedTaskChain>> getSharedChains() {
+        return sharedChains;
     }
 
     /**
@@ -64,27 +73,8 @@ public class TaskChainFactory {
      * @param name Name of the shared chain. Case sensitive
      */
     public synchronized <T> TaskChain<T> newSharedChain(String name) {
-        TaskChain<?> chain;
-        synchronized (sharedChains) {
-            chain = sharedChains.get(name);
-
-            if (chain != null) {
-                //noinspection NestedSynchronizedStatement,SynchronizationOnLocalVariableOrMethodParameter
-                synchronized (chain) {
-                    if (chain.done) {
-                        chain = null;
-                    }
-                }
-            }
-
-            if (chain == null) {
-                chain = new TaskChain<>(this, true, name);
-                sharedChains.put(name, chain);
-            }
-        }
-
         //noinspection unchecked
-        return new SharedTaskChain<>(this, (TaskChain<T>) chain);
+        return new SharedTaskChain<>(name, this);
     }
 
     /**
@@ -113,15 +103,5 @@ public class TaskChainFactory {
     public void shutdown(int duration, TimeUnit units) {
         shutdown = true;
         asyncQueue.shutdown(duration, units);
-    }
-
-    GameInterface getImplementation() {
-        return impl;
-    }
-
-    void removeSharedChain(String name) {
-        synchronized (sharedChains) {
-            sharedChains.remove(name);
-        }
     }
 }

@@ -26,29 +26,68 @@ package co.aikar.taskchain;
 
 import co.aikar.taskchain.TaskChainTasks.Task;
 
+import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 class SharedTaskChain<R> extends TaskChain<R> {
-    private final TaskChain<R> backingChain;
-    SharedTaskChain(TaskChainFactory factory, TaskChain<R> backingChain) {
+    private final String name;
+    private final Map<String, Queue<SharedTaskChain>> sharedChains;
+    private Queue<SharedTaskChain> queue;
+    private boolean isReady;
+
+    SharedTaskChain(String name, TaskChainFactory factory) {
         super(factory);
-        this.backingChain = backingChain;
+        this.sharedChains = factory.getSharedChains();
+        this.name = name;
+
+        synchronized (this.sharedChains) {
+            this.queue = sharedChains.get(this.name);
+            if (this.queue == null) {
+                this.queue = new ConcurrentLinkedQueue<>();
+                this.sharedChains.put(this.name, this.queue);
+            }
+            this.queue.add(this);
+        }
     }
 
     @Override
     public void execute(Consumer<Boolean> done, BiConsumer<Exception, Task<?, ?>> errorHandler) {
-        synchronized (backingChain) {
-            backingChain.currentCallback((next) -> {
-                this.setErrorHandler(errorHandler);
-                this.setDoneCallback((finished) -> {
-                    this.setDoneCallback(done);
-                    this.done(finished);
-                    next.run();
-                });
-                this.execute0();
-            });
-            backingChain.execute();
+        this.setErrorHandler(errorHandler);
+        this.setDoneCallback((finished) -> {
+            this.setDoneCallback(done);
+            this.done(finished);
+            processQueue();
+        });
+
+        synchronized (sharedChains) {
+            isReady = true;
         }
+        if (queue.peek() == this) {
+            execute0();
+        }
+    }
+
+    /**
+     * Launches the next TaskChain in the queue if it is ready, or cleans up the queue if nothing left to do.
+     */
+    private void processQueue() {
+        this.queue.poll(); // Remove self
+        final SharedTaskChain next;
+        synchronized (this.sharedChains) {
+            next = this.queue.peek();
+            if (next == null) {
+                this.sharedChains.remove(this.name);
+                return;
+            }
+            if (!next.isReady) {
+                // Created but wasn't executed yet. Wait until the chain executes itself.
+                return;
+            }
+        }
+
+        next.execute0();
     }
 }

@@ -68,18 +68,16 @@ import java.util.function.Consumer;
 public class TaskChain <T> {
     private static final ThreadLocal<TaskChain<?>> currentChain = new ThreadLocal<>();
 
-    private final boolean shared;
     private final GameInterface impl;
     private final TaskChainFactory factory;
-    private final String sharedName;
     private final Map<String, Object> taskMap = new HashMap<>(0);
     private final ConcurrentLinkedQueue<TaskHolder<?,?>> chainQueue = new ConcurrentLinkedQueue<>();
 
+    private int currentActionIndex = 0;
+    private int actionIndex = 0;
     private boolean executed = false;
-    private boolean async;
-    private int actionIndex;
-    private int currentActionIndex;
-    boolean done = false;
+    private boolean async = false;
+    private boolean done = false;
 
     private Object previous;
     private TaskHolder<?, ?> currentHolder;
@@ -88,18 +86,11 @@ public class TaskChain <T> {
 
     /* ======================================================================================== */
     TaskChain(TaskChainFactory factory) {
-        this(factory, false, null);
-    }
-
-    TaskChain(TaskChainFactory factory, boolean shared, String sharedName) {
         this.factory = factory;
         this.impl = factory.getImplementation();
-        this.shared = shared;
-        this.sharedName = sharedName;
     }
     /* ======================================================================================== */
     // <editor-fold desc="// Getters & Setters">
-
     /**
      * Called in an executing task, get the current action index.
      * For every action that adds a task to the chain, the action index is increased.
@@ -739,12 +730,9 @@ public class TaskChain <T> {
         abort();
     }
 
-    void execute0() {
+    protected void execute0() {
         synchronized (this) {
             if (this.executed) {
-                if (this.shared) {
-                    return;
-                }
                 throw new RuntimeException("Already executed");
             }
             this.executed = true;
@@ -755,9 +743,6 @@ public class TaskChain <T> {
 
     void done(boolean finished) {
         this.done = true;
-        if (this.shared) {
-            factory.removeSharedChain(this.sharedName);
-        }
         if (this.doneCallback != null) {
             final TaskChain<?> prev = currentChain.get();
             try {
@@ -774,7 +759,7 @@ public class TaskChain <T> {
     @SuppressWarnings({"rawtypes", "WeakerAccess"})
     protected TaskChain add0(TaskHolder<?,?> task) {
         synchronized (this) {
-            if (!this.shared && this.executed) {
+            if (this.executed) {
                 throw new RuntimeException("TaskChain is executing");
             }
         }
