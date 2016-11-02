@@ -1,4 +1,6 @@
 # TaskChain Changelog
+## Version 3.3.4
+* Rewrote the SharedTaskChain logic. All 3.x versions before this is assumed to have broken Shared Task Chain logic with rare concurrency issues.
 
 ## Version 3.3.3
 * Fix POM files for dependencies to create the dependency reduced POM files to avoid double including in shade.
