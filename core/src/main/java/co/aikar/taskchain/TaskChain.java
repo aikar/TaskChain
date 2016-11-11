@@ -33,17 +33,12 @@
 
 package co.aikar.taskchain;
 
-import co.aikar.taskchain.TaskChainTasks.AsyncExecutingFirstTask;
-import co.aikar.taskchain.TaskChainTasks.AsyncExecutingGenericTask;
-import co.aikar.taskchain.TaskChainTasks.AsyncExecutingTask;
-import co.aikar.taskchain.TaskChainTasks.FirstTask;
-import co.aikar.taskchain.TaskChainTasks.GenericTask;
-import co.aikar.taskchain.TaskChainTasks.LastTask;
-import co.aikar.taskchain.TaskChainTasks.Task;
+import co.aikar.taskchain.TaskChainTasks.*;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
@@ -143,7 +138,7 @@ public class TaskChain <T> {
      * Gets the current chain that is executing this Task or Error/Done handler
      * This method should only be called on the same thread that is executing the method.
      *
-     * In an AsyncExecutingTask, You must call this method BEFORE passing control to another thread.
+     * In an AsyncExecutingTask or a FutureTask, You must call this method BEFORE passing control to another thread.
      */
     @SuppressWarnings("WeakerAccess")
     public static TaskChain<?> getCurrentChain() {
@@ -418,6 +413,10 @@ public class TaskChain <T> {
         });
     }
 
+    /* ======================================================================================== */
+    // Async Executing Tasks
+    /* ======================================================================================== */
+
     /**
      * Execute a task on the main thread, with no previous input, and a callback to return the response to.
      *
@@ -530,6 +529,127 @@ public class TaskChain <T> {
     public TaskChain<?> currentCallback(AsyncExecutingGenericTask task) {
         return add0(new TaskHolder<>(this, null, task));
     }
+
+    /* ======================================================================================== */
+    // Future Tasks
+    /* ======================================================================================== */
+
+    /**
+     * Execute a task on the main thread, with no previous input, and a callback to return the response to.
+     *
+     * It's important you don't perform blocking operations in this method. Only use this if
+     * the task will be scheduling a different sync operation outside of the TaskChains scope.
+     *
+     * Usually you could achieve the same design with a blocking API by switching to an async task
+     * for the next task and running it there.
+     *
+     * This method would primarily be for cases where you need to use an API that ONLY provides
+     * a callback style API.
+     *
+     * @param task The task to execute
+     * @param <R> Return type that the next parameter can expect as argument type
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <R> TaskChain<R> syncFirstFuture(FutureFirstTask<R> task) {
+        //noinspection unchecked
+        return add0(new TaskHolder<>(this, false, task));
+    }
+
+    /**
+     * @see #syncFirstFuture(FutureFirstTask) but ran off main thread
+     * @param task The task to execute
+     * @param <R> Return type that the next parameter can expect as argument type
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <R> TaskChain<R> asyncFirstFuture(FutureFirstTask<R> task) {
+        //noinspection unchecked
+        return add0(new TaskHolder<>(this, true, task));
+    }
+
+    /**
+     * @see #syncFirstFuture(FutureFirstTask) but ran on current thread the Chain was created on
+     * @param task The task to execute
+     * @param <R> Return type that the next parameter can expect as argument type
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <R> TaskChain<R> currentFirstFuture(FutureFirstTask<R> task) {
+        //noinspection unchecked
+        return add0(new TaskHolder<>(this, null, task));
+    }
+
+    /**
+     * Execute a task on the main thread, with the last output, and a callback to return the response to.
+     *
+     * It's important you don't perform blocking operations in this method. Only use this if
+     * the task will be scheduling a different sync operation outside of the TaskChains scope.
+     *
+     * Usually you could achieve the same design with a blocking API by switching to an async task
+     * for the next task and running it there.
+     *
+     * This method would primarily be for cases where you need to use an API that ONLY provides
+     * a callback style API.
+     *
+     * @param task The task to execute
+     * @param <R> Return type that the next parameter can expect as argument type
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <R> TaskChain<R> syncFuture(FutureTask<R, T> task) {
+        //noinspection unchecked
+        return add0(new TaskHolder<>(this, false, task));
+    }
+
+    /**
+     * @see #syncFuture(FutureTask), ran on main thread but no input or output
+     * @param task The task to execute
+     */
+    @SuppressWarnings("WeakerAccess")
+    public TaskChain<?> syncFuture(FutureGenericTask task) {
+        return add0(new TaskHolder<>(this, false, task));
+    }
+
+    /**
+     * @see #syncFuture(FutureTask) but ran off main thread
+     * @param task The task to execute
+     * @param <R> Return type that the next parameter can expect as argument type
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <R> TaskChain<R> asyncFuture(FutureTask<R, T> task) {
+        //noinspection unchecked
+        return add0(new TaskHolder<>(this, true, task));
+    }
+
+    /**
+     * @see #syncFuture(FutureTask) but ran off main thread
+     * @param task The task to execute
+     */
+    @SuppressWarnings("WeakerAccess")
+    public TaskChain<?> asyncFuture(FutureGenericTask task) {
+        return add0(new TaskHolder<>(this, true, task));
+    }
+
+    /**
+     * @see #syncFuture(FutureTask) but ran on current thread the Chain was created on
+     * @param task The task to execute
+     * @param <R> Return type that the next parameter can expect as argument type
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <R> TaskChain<R> currentFuture(FutureTask<R, T> task) {
+        //noinspection unchecked
+        return add0(new TaskHolder<>(this, null, task));
+    }
+
+    /**
+     * @see #syncFuture(FutureTask) but ran on current thread the Chain was created on
+     * @param task The task to execute
+     */
+    @SuppressWarnings("WeakerAccess")
+    public TaskChain<?> currentFuture(FutureGenericTask task) {
+        return add0(new TaskHolder<>(this, null, task));
+    }
+
+    /* ======================================================================================== */
+    // Normal Tasks
+    /* ======================================================================================== */
 
     /**
      * Execute task on main thread, with no input, returning an output
@@ -810,7 +930,8 @@ public class TaskChain <T> {
         }
     }
 
-    private void handleError(Exception e, Task<?, ?> task) {
+    private void handleError(Throwable throwable, Task<?, ?> task) {
+        Exception e = throwable instanceof Exception ? (Exception) throwable : new Exception(throwable);
         if (errorHandler != null) {
             final TaskChain<?> prev = currentChain.get();
             try {
@@ -828,6 +949,12 @@ public class TaskChain <T> {
             TaskChainUtil.logError("Current Action Index was: " + currentActionIndex);
             e.printStackTrace();
         }
+    }
+
+    void abortChain() {
+        this.previous = null;
+        this.chainQueue.clear();
+        this.done(false);
     }
     // </editor-fold>
     /* ======================================================================================== */
@@ -866,14 +993,27 @@ public class TaskChain <T> {
             final TaskChain<?> prevChain = currentChain.get();
             try {
                 currentChain.set(this.chain);
-                if (this.task instanceof AsyncExecutingTask) {
+                if (this.task instanceof FutureTask) {
+                    //noinspection unchecked
+                    final CompletableFuture<R> future = ((FutureTask<R, A>) this.task).runFuture((A) arg);
+                    if (future == null) {
+                        throw new NullPointerException("Must return a Future");
+                    }
+                    future.whenComplete((r, throwable) -> {
+                        if (throwable != null) {
+                            TaskChainUtil.sneakyThrows(throwable);
+                        } else {
+                            this.next(r);
+                        }
+                    });
+                } else if (this.task instanceof AsyncExecutingTask) {
                     //noinspection unchecked
                     ((AsyncExecutingTask<R, A>) this.task).runAsync((A) arg, this::next);
                 } else {
                     //noinspection unchecked
                     next(this.task.run((A) arg));
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 //noinspection ConstantConditions
                 if (e instanceof AbortChainException) {
                     this.abort();
@@ -895,9 +1035,7 @@ public class TaskChain <T> {
          */
         private synchronized void abort() {
             this.aborted = true;
-            this.chain.previous = null;
-            this.chain.chainQueue.clear();
-            this.chain.done(false);
+            this.chain.abortChain();
         }
 
         /**

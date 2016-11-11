@@ -23,12 +23,15 @@
 
 package co.aikar.taskchain;
 
+import java.util.concurrent.CompletableFuture;
+
 public class TaskChainExample {
     /**
      * A useless example of registering multiple task signatures and states
      */
     public static void example(TaskChainFactory factory) {
         TaskChainUtil.log("Starting example");
+        final AsyncQueue asyncQueue = factory.getImplementation().getAsyncQueue();
         TaskChain<?> chain = factory.newSharedChain("TEST");
         chain
             .delay(20 * 3)
@@ -46,7 +49,7 @@ public class TaskChainExample {
 
 
         // This chain essentially appends onto the previous one, and will not overlap
-        factory.getImplementation().postAsync(() -> {
+        asyncQueue.postAsync(() -> {
             TaskChain<?> chain2 = factory.newSharedChain("TEST");
             chain2
                 .sync(() -> {
@@ -94,17 +97,31 @@ public class TaskChainExample {
                 TaskChainUtil.log("should of got 3: " + input);
                 return 5 + input;
             })
+            .asyncFuture((foo) -> {
+                CompletableFuture<Integer> future = new CompletableFuture<>();
+                asyncQueue.postAsync(() -> {
+                    TaskChainUtil.log("Sleeping 1 before completing future");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    future.complete(foo + 10);
+                });
+                TaskChainUtil.log("Returning Future");
+                return future;
+            })
             .storeAsData("Test1")
-            .syncLast(input2 -> TaskChainUtil.log("should be 8: " + input2)) // Consumes last result, but doesn't pass a new one
+            .syncLast(input2 -> TaskChainUtil.log("should be 18: " + input2)) // Consumes last result, but doesn't pass a new one
             .delay(20) // Wait 1s until next
             .sync(() -> TaskChainUtil.log("Generic 1s later")) // no input expected, no output, run sync
             .asyncFirst(() -> 3) // Run task async and return 3
             .delay(5 * 20) // Wait 5s
-            .asyncLast(input1 -> TaskChainUtil.log("async last value 5s later: " + input1)) // Run async again, with value of 3
+            .asyncLast(input1 -> TaskChainUtil.log("async last value 5s later should be 3: " + input1)) // Run async again, with value of 3
             .<Integer>returnData("Test1")
-            .asyncLast((val) -> TaskChainUtil.log("Should of got 8 back from data: " + val))
+            .asyncLast((val) -> TaskChainUtil.log("Should of got 18 back from data: " + val))
             .<Integer>returnData("Test1")
-            .abortIf(8)
+            .abortIf(18)
             .sync(() -> TaskChainUtil.log("Shouldn't be called"))
             .execute((finished) -> TaskChainUtil.log("final test chain finished: " + finished));
     }

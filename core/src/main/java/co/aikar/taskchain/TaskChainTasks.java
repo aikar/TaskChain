@@ -23,41 +23,119 @@
 
 package co.aikar.taskchain;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+@SuppressWarnings("WeakerAccess")
 public class TaskChainTasks {
     /**
      * Generic task with synchronous return (but may execute on any thread)
+     *
      * @param <R>
      * @param <A>
      */
-    @SuppressWarnings("WeakerAccess")
-    public interface Task <R, A> {
+    public interface Task<R, A> {
         /**
-         * Gets the current chain that is executing this task. This method should only be called on the same thread
-         * that is executing the task.
-         * @return
+         * {@link TaskChain#getCurrentChain()}
          */
-        public default TaskChain<?> getCurrentChain() {
+        default TaskChain<?> getCurrentChain() {
             return TaskChain.getCurrentChain();
         }
 
         R run(A input);
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public interface AsyncExecutingTask<R, A> extends Task<R, A> {
-        /**
-         * Gets the current chain that is executing this task. This method should only be called on the same thread
-         * that is executing the task.
-         *
-         * Since this is an AsyncExecutingTask, You must call this method BEFORE passing control to another thread.
-         * @return
-         */
-        default TaskChain<?> getCurrentChain() {
-            return TaskChain.getCurrentChain();
+    /**
+     * A task that expects no input, and returns a value.
+     * Likely to be the first task in the chain
+     */
+    public interface FirstTask<R> extends Task<R, Object> {
+        @Override
+        default R run(Object input) {
+            return run();
         }
 
+        R run();
+    }
+
+
+    /**
+     * A task that expects input, but will not provide a response.
+     * Likely to be the last task in the chain
+     * @param <A>
+     */
+    public interface LastTask<A> extends Task<Object, A> {
+        @Override
+        default Object run(A input) {
+            runLast(input);
+            return null;
+        }
+
+        void runLast(A input);
+    }
+
+    /**
+     * A task that expects no input or output
+     */
+    public interface GenericTask extends Task<Object, Object> {
+        @Override
+        default Object run(Object input) {
+            runGeneric();
+            return null;
+        }
+
+        void runGeneric();
+    }
+
+    /**
+     * A task that returns a future to be completed later. Takes input from chain and when the future completes,
+     * the value will be passed to the next task.
+     *
+     * @param <R> The type the Future will complete with
+     * @param <A> The type from the previous task
+     */
+    public interface FutureTask<R, A> extends Task<R, A> {
+        @Override
+        default R run(A input) {
+            return null;
+        }
+
+        CompletableFuture<R> runFuture(A input);
+    }
+
+    /**
+     * A Task that returns a future to be completed later. Expects no input, and  when the future completes,
+     * the value will be passed to the next task.
+     */
+    public interface FutureFirstTask<R> extends FutureTask<R, Object> {
+        @Override
+        default CompletableFuture<R> runFuture(Object input) {
+            return runFuture();
+        }
+
+        CompletableFuture<R> runFuture();
+    }
+
+
+    /**
+     * A generic task that expects no input or output, but uses a future style API
+     * to control moving to the next task.
+     */
+    public interface FutureGenericTask extends FutureTask<Object, Object> {
+        @Override
+        default CompletableFuture<Object> runFuture(Object input) {
+            return runFuture();
+        }
+
+        CompletableFuture<Object> runFuture();
+    }
+
+    /**
+     * A task that does not return immediately. A supplied Consumer controls when
+     * the chain should proceed to the next task, and providing a response to be passed
+     * to the next task. This is a Callback style API in relation to the Future based API.
+     */
+    public interface AsyncExecutingTask<R, A> extends Task<R, A> {
         @Override
         default R run(A input) {
             // unused
@@ -67,17 +145,10 @@ public class TaskChainTasks {
         void runAsync(A input, Consumer<R> next);
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public interface FirstTask <R> extends Task<R, Object> {
-        @Override
-        default R run(Object input) {
-            return run();
-        }
-
-        R run();
-    }
-
-    @SuppressWarnings("WeakerAccess")
+    /**
+     * {@link AsyncExecutingTask}
+     * {@link FirstTask}
+     */
     public interface AsyncExecutingFirstTask<R> extends AsyncExecutingTask<R, Object> {
         @Override
         default R run(Object input) {
@@ -93,32 +164,16 @@ public class TaskChainTasks {
         void run(Consumer<R> next);
     }
 
-    @SuppressWarnings("WeakerAccess")
-    public interface LastTask <A> extends Task<Object, A> {
-        @Override
-        default Object run(A input) {
-            runLast(input);
-            return null;
-        }
-        void runLast(A input);
-    }
-
-    @SuppressWarnings("WeakerAccess")
-    public interface GenericTask extends Task<Object, Object> {
-        @Override
-        default Object run(Object input) {
-            runGeneric();
-            return null;
-        }
-        void runGeneric();
-    }
-
-    @SuppressWarnings("WeakerAccess")
+    /**
+     * {@link AsyncExecutingTask}
+     * {@link GenericTask}
+     */
     public interface AsyncExecutingGenericTask extends AsyncExecutingTask<Object, Object> {
         @Override
         default Object run(Object input) {
             return null;
         }
+
         @Override
         default void runAsync(Object input, Consumer<Object> next) {
             run(() -> next.accept(null));
