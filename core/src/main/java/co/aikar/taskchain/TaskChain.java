@@ -1001,7 +1001,8 @@ public class TaskChain <T> {
                     }
                     future.whenComplete((r, throwable) -> {
                         if (throwable != null) {
-                            TaskChainUtil.sneakyThrows(throwable);
+                            this.chain.handleError(throwable, this.task);
+                            this.abort();
                         } else {
                             this.next(r);
                         }
