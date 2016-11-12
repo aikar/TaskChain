@@ -559,7 +559,7 @@ public class TaskChain <T> {
 
     /**
      * Takes multiple supplied Futures, and holds processing of the chain until the futures completes.
-     * The value of the Future will be passed until the next task.
+     * The results of the Futures will be passed until the next task.
      *
      * @param futures The Futures to wait until it is complete on
      * @param <R> Return type that the next parameter can expect as argument type
@@ -574,7 +574,7 @@ public class TaskChain <T> {
 
     /**
      * Takes multiple supplied Futures, and holds processing of the chain until the futures completes.
-     * The value of the Future will be passed until the next task.
+     * The results of the Futures will be passed until the next task.
      *
      * @param futures The Futures to wait until it is complete on
      * @param <R> Return type that the next parameter can expect as argument type
@@ -1096,7 +1096,21 @@ public class TaskChain <T> {
             if (throwable != null) {
                 onDone.completeExceptionally(throwable);
             } else {
-                onDone.complete(futures.stream().map(CompletableFuture::join).collect(Collectors.toList()));
+                boolean[] error = {false};
+                final List<R> results = futures.stream().map(f -> {
+                    try {
+                        return f.join();
+                    } catch (Exception e) {
+                        error[0] = true;
+                        TaskChain.this.handleError(e, TaskChain.this.currentHolder.task);
+                        return null;
+                    }
+                }).collect(Collectors.toList());
+                if (error[0]) {
+                    onDone.completeExceptionally(new Exception("Future Dependant had an exception"));
+                } else {
+                    onDone.complete(results);
+                }
             }
         });
         return onDone;
