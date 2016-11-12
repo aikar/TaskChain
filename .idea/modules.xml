@@ -2,10 +2,18 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/bukkit.iml" filepath="$PROJECT_DIR$/.idea/bukkit.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/core.iml" filepath="$PROJECT_DIR$/.idea/core.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/sponge.iml" filepath="$PROJECT_DIR$/.idea/sponge.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/taskchain.iml" filepath="$PROJECT_DIR$/.idea/taskchain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/TaskChain.iml" filepath="$PROJECT_DIR$/.idea/modules/TaskChain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/TaskChain_main.iml" filepath="$PROJECT_DIR$/.idea/modules/TaskChain_main.iml" group="TaskChain" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/TaskChain_test.iml" filepath="$PROJECT_DIR$/.idea/modules/TaskChain_test.iml" group="TaskChain" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bukkit/bukkit.iml" filepath="$PROJECT_DIR$/.idea/modules/bukkit/bukkit.iml" group="bukkit" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bukkit/bukkit_main.iml" filepath="$PROJECT_DIR$/.idea/modules/bukkit/bukkit_main.iml" group="bukkit" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/bukkit/bukkit_test.iml" filepath="$PROJECT_DIR$/.idea/modules/bukkit/bukkit_test.iml" group="bukkit" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core.iml" group="core" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core_main.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core_main.iml" group="core" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/core/core_test.iml" filepath="$PROJECT_DIR$/.idea/modules/core/core_test.iml" group="core" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sponge/sponge.iml" filepath="$PROJECT_DIR$/.idea/modules/sponge/sponge.iml" group="sponge" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sponge/sponge_main.iml" filepath="$PROJECT_DIR$/.idea/modules/sponge/sponge_main.iml" group="sponge" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/sponge/sponge_test.iml" filepath="$PROJECT_DIR$/.idea/modules/sponge/sponge_test.iml" group="sponge" />
     </modules>
   </component>
 </project>
