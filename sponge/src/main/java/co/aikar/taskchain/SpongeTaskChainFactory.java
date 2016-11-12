@@ -57,7 +57,7 @@ public class SpongeTaskChainFactory extends TaskChainFactory {
 
         @Override
         public boolean isMainThread() {
-            return false;
+            return Sponge.getServer().isMainThread();
         }
 
         @Override

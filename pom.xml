@@ -89,6 +89,6 @@
     <modules>
         <module>core</module>
         <module>bukkit</module>
-        <!--module>sponge</module-->
+        <module>sponge</module>
     </modules>
 </project>
