@@ -3,8 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/TaskChain.iml" filepath="$PROJECT_DIR$/.idea/modules/TaskChain.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/TaskChain_main.iml" filepath="$PROJECT_DIR$/.idea/modules/TaskChain_main.iml" group="TaskChain" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/TaskChain_test.iml" filepath="$PROJECT_DIR$/.idea/modules/TaskChain_test.iml" group="TaskChain" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/bukkit/bukkit.iml" filepath="$PROJECT_DIR$/.idea/modules/bukkit/bukkit.iml" group="bukkit" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/bukkit/bukkit_main.iml" filepath="$PROJECT_DIR$/.idea/modules/bukkit/bukkit_main.iml" group="bukkit" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/bukkit/bukkit_test.iml" filepath="$PROJECT_DIR$/.idea/modules/bukkit/bukkit_test.iml" group="bukkit" />
