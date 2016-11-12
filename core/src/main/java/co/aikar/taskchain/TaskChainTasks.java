@@ -36,7 +36,7 @@ public class TaskChainTasks {
      */
     public interface Task<R, A> {
         /**
-         * {@link TaskChain#getCurrentChain()}
+         * @see TaskChain#getCurrentChain()
          */
         default TaskChain<?> getCurrentChain() {
             return TaskChain.getCurrentChain();
@@ -146,8 +146,8 @@ public class TaskChainTasks {
     }
 
     /**
-     * {@link AsyncExecutingTask}
-     * {@link FirstTask}
+     * @see AsyncExecutingTask
+     * @see FirstTask
      */
     public interface AsyncExecutingFirstTask<R> extends AsyncExecutingTask<R, Object> {
         @Override
@@ -165,8 +165,8 @@ public class TaskChainTasks {
     }
 
     /**
-     * {@link AsyncExecutingTask}
-     * {@link GenericTask}
+     * @see AsyncExecutingTask
+     * @see GenericTask
      */
     public interface AsyncExecutingGenericTask extends AsyncExecutingTask<Object, Object> {
         @Override
