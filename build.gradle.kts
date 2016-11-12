@@ -25,7 +25,11 @@ val groupId by project
 val artifactId by project
 val tcVersion by project
 
-allprojects {
+apply {
+    plugin("base")
+}
+
+subprojects {
     apply {
         plugin<JavaPlugin>()
     }
