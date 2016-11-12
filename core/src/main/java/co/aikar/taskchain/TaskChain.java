@@ -35,7 +35,10 @@ package co.aikar.taskchain;
 
 import co.aikar.taskchain.TaskChainTasks.*;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -43,6 +46,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 
 /**
@@ -123,7 +127,7 @@ public class TaskChain <T> {
     }
     // </editor-fold>
     /* ======================================================================================== */
-    //<editor-fold desc="// API Methods">
+    //<editor-fold desc="// API Methods - Base">
     /**
      * Call to abort execution of the chain. Should be called inside of an executing task.
      */
@@ -231,6 +235,41 @@ public class TaskChain <T> {
         return currentFirst(() -> this);
     }
 
+
+    /**
+     * IMPLEMENTATION SPECIFIC!!
+     * Consult your application implementation to understand how long 1 unit is.
+     *
+     * For example, in Minecraft it is a tick, which is roughly 50 milliseconds, but not guaranteed.
+     *
+     * Adds a delay to the chain execution.
+     *
+     * @param gameUnits # of game units to delay before next task
+     */
+    @SuppressWarnings("WeakerAccess")
+    public TaskChain<T> delay(final int gameUnits) {
+        //noinspection CodeBlock2Expr
+        return currentCallback((input, next) -> {
+            impl.scheduleTask(gameUnits, () -> next.accept(input));
+        });
+    }
+
+    /**
+     * Adds a real time delay to the chain execution.
+     * Chain will abort if the delay is interrupted.
+     *
+     * @param duration duration of the delay before next task
+     */
+    @SuppressWarnings("WeakerAccess")
+    public TaskChain<T> delay(final int duration, TimeUnit unit) {
+        //noinspection CodeBlock2Expr
+        return currentCallback((input, next) -> {
+            impl.scheduleTask(duration, unit, () -> next.accept(input));
+        });
+    }
+
+    // </editor-fold>
+    //<editor-fold desc="// API Methods - Abort">
     /**
      * Checks if the previous task return was null.
      *
@@ -381,38 +420,8 @@ public class TaskChain <T> {
         });
     }
 
-    /**
-     * IMPLEMENTATION SPECIFIC!!
-     * Consult your application implementation to understand how long 1 unit is.
-     *
-     * For example, in Minecraft it is a tick, which is roughly 50 milliseconds, but not guaranteed.
-     *
-     * Adds a delay to the chain execution.
-     *
-     * @param gameUnits # of game units to delay before next task
-     */
-    @SuppressWarnings("WeakerAccess")
-    public TaskChain<T> delay(final int gameUnits) {
-        //noinspection CodeBlock2Expr
-        return currentCallback((input, next) -> {
-            impl.scheduleTask(gameUnits, () -> next.accept(input));
-        });
-    }
-
-    /**
-     * Adds a real time delay to the chain execution.
-     * Chain will abort if the delay is interrupted.
-     *
-     * @param duration duration of the delay before next task
-     */
-    @SuppressWarnings("WeakerAccess")
-    public TaskChain<T> delay(final int duration, TimeUnit unit) {
-        //noinspection CodeBlock2Expr
-        return currentCallback((input, next) -> {
-            impl.scheduleTask(duration, unit, () -> next.accept(input));
-        });
-    }
-
+    // </editor-fold>
+    // <editor-fold desc="// API Methods - Async Executing">
     /* ======================================================================================== */
     // Async Executing Tasks
     /* ======================================================================================== */
@@ -530,21 +539,147 @@ public class TaskChain <T> {
         return add0(new TaskHolder<>(this, null, task));
     }
 
+    // </editor-fold>
+    // <editor-fold desc="// API Methods - Future">
     /* ======================================================================================== */
     // Future Tasks
     /* ======================================================================================== */
 
     /**
-     * Execute a task on the main thread, with no previous input, and a callback to return the response to.
+     * Takes a supplied Future, and holds processing of the chain until the future completes.
+     * The value of the Future will be passed until the next task.
+     *
+     * @param future The Future to wait until it is complete on
+     * @param <R> Return type that the next parameter can expect as argument type
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <R> TaskChain<R> future(CompletableFuture<R> future) {
+        return currentFuture((input) -> future);
+    }
+
+    /**
+     * Takes multiple supplied Futures, and holds processing of the chain until the futures completes.
+     * The value of the Future will be passed until the next task.
+     *
+     * @param futures The Futures to wait until it is complete on
+     * @param <R> Return type that the next parameter can expect as argument type
+     */
+    @SafeVarargs
+    @SuppressWarnings("WeakerAccess")
+    public final <R> TaskChain<List<R>> futures(CompletableFuture<R>... futures) {
+        List<CompletableFuture<R>> futureList = new ArrayList<>(futures.length);
+        Collections.addAll(futureList, futures);
+        return futures(futureList);
+    }
+
+    /**
+     * Takes multiple supplied Futures, and holds processing of the chain until the futures completes.
+     * The value of the Future will be passed until the next task.
+     *
+     * @param futures The Futures to wait until it is complete on
+     * @param <R> Return type that the next parameter can expect as argument type
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <R> TaskChain<List<R>> futures(List<CompletableFuture<R>> futures) {
+        return currentFuture((input) -> getFuture(futures));
+    }
+
+    /**
+     * Executes a Task on the Main thread that provides a list of Futures, and holds processing
+     * of the chain until all of the futures completes.
+     *
+     * The response of every future will be passed to the next task as a List, in the order
+     * the futures were supplied.
+     *
+     * @param task The Futures Provider Task
+     * @param <R> Return type that the next parameter can expect as argument type
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <R> TaskChain<List<R>> syncFutures(Task<List<CompletableFuture<R>>, T> task) {
+        return syncFuture((input) -> getFuture(task.run(input)));
+    }
+
+    /**
+     * Executes a Task off the Main thread that provides a list of Futures, and holds processing
+     * of the chain until all of the futures completes.
+     *
+     * The response of every future will be passed to the next task as a List, in the order
+     * the futures were supplied.
+     *
+     * @param task The Futures Provider Task
+     * @param <R> Return type that the next parameter can expect as argument type
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <R> TaskChain<List<R>> asyncFutures(Task<List<CompletableFuture<R>>, T> task) {
+        return asyncFuture((input) -> getFuture(task.run(input)));
+    }
+
+    /**
+     * Executes a Task on the current thread that provides a list of Futures, and holds processing
+     * of the chain until all of the futures completes.
+     *
+     * The response of every future will be passed to the next task as a List, in the order
+     * the futures were supplied.
+     *
+     * @param task The Futures Provider Task
+     * @param <R> Return type that the next parameter can expect as argument type
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <R> TaskChain<List<R>> currentFutures(Task<List<CompletableFuture<R>>, T> task) {
+        return currentFuture((input) -> getFuture(task.run(input)));
+    }
+
+    /**
+     * Executes a Task on the Main thread that provides a list of Futures, and holds processing
+     * of the chain until all of the futures completes.
+     *
+     * The response of every future will be passed to the next task as a List, in the order
+     * the futures were supplied.
+     *
+     * @param task The Futures Provider Task
+     * @param <R> Return type that the next parameter can expect as argument type
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <R> TaskChain<List<R>> syncFirstFutures(FirstTask<List<CompletableFuture<R>>> task) {
+        return syncFuture((input) -> getFuture(task.run()));
+    }
+
+    /**
+     * Executes a Task off the Main thread that provides a list of Futures, and holds processing
+     * of the chain until all of the futures completes.
+     *
+     * The response of every future will be passed to the next task as a List, in the order
+     * the futures were supplied.
+     *
+     * @param task The Futures Provider Task
+     * @param <R> Return type that the next parameter can expect as argument type
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <R> TaskChain<List<R>> asyncFirstFutures(FirstTask<List<CompletableFuture<R>>> task) {
+        return asyncFuture((input) -> getFuture(task.run()));
+    }
+
+    /**
+     * Executes a Task on the current thread that provides a list of Futures, and holds processing
+     * of the chain until all of the futures completes.
+     *
+     * The response of every future will be passed to the next task as a List, in the order
+     * the futures were supplied.
+     *
+     * @param task The Futures Provider Task
+     * @param <R> Return type that the next parameter can expect as argument type
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <R> TaskChain<List<R>> currentFirstFutures(FirstTask<List<CompletableFuture<R>>> task) {
+        return currentFuture((input) -> getFuture(task.run()));
+    }
+
+    /**
+     * Execute a task on the main thread, with no previous input, that will return a Future to signal completion
      *
      * It's important you don't perform blocking operations in this method. Only use this if
-     * the task will be scheduling a different sync operation outside of the TaskChains scope.
+     * the task will be scheduling a different async operation outside of the TaskChains scope.
      *
-     * Usually you could achieve the same design with a blocking API by switching to an async task
-     * for the next task and running it there.
-     *
-     * This method would primarily be for cases where you need to use an API that ONLY provides
-     * a callback style API.
      *
      * @param task The task to execute
      * @param <R> Return type that the next parameter can expect as argument type
@@ -578,16 +713,11 @@ public class TaskChain <T> {
     }
 
     /**
-     * Execute a task on the main thread, with the last output, and a callback to return the response to.
+     * Execute a task on the main thread, with the last output as the input to the future provider,
+     * that will return a Future to signal completion.
      *
      * It's important you don't perform blocking operations in this method. Only use this if
-     * the task will be scheduling a different sync operation outside of the TaskChains scope.
-     *
-     * Usually you could achieve the same design with a blocking API by switching to an async task
-     * for the next task and running it there.
-     *
-     * This method would primarily be for cases where you need to use an API that ONLY provides
-     * a callback style API.
+     * the task will be scheduling a different async operation outside of the TaskChains scope.
      *
      * @param task The task to execute
      * @param <R> Return type that the next parameter can expect as argument type
@@ -608,7 +738,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncFuture(FutureTask) but ran off main thread
+     * @see #syncFuture(FutureTask) but the future provider is ran off main thread
      * @param task The task to execute
      * @param <R> Return type that the next parameter can expect as argument type
      */
@@ -619,7 +749,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncFuture(FutureTask) but ran off main thread
+     * @see #syncFuture(FutureTask) but the future provider is ran off main thread
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
@@ -628,7 +758,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncFuture(FutureTask) but ran on current thread the Chain was created on
+     * @see #syncFuture(FutureTask) but the future provider is ran on current thread the Chain was created on
      * @param task The task to execute
      * @param <R> Return type that the next parameter can expect as argument type
      */
@@ -639,7 +769,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncFuture(FutureTask) but ran on current thread the Chain was created on
+     * @see #syncFuture(FutureTask) but the future provider is ran on current thread the Chain was created on
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
@@ -647,6 +777,8 @@ public class TaskChain <T> {
         return add0(new TaskHolder<>(this, null, task));
     }
 
+    // </editor-fold>
+    // <editor-fold desc="// API Methods - Normal">
     /* ======================================================================================== */
     // Normal Tasks
     /* ======================================================================================== */
@@ -850,7 +982,7 @@ public class TaskChain <T> {
         abort();
     }
 
-    protected void execute0() {
+    void execute0() {
         synchronized (this) {
             if (this.executed) {
                 throw new RuntimeException("Already executed");
@@ -951,11 +1083,25 @@ public class TaskChain <T> {
         }
     }
 
-    void abortChain() {
+    private void abortChain() {
         this.previous = null;
         this.chainQueue.clear();
         this.done(false);
     }
+
+    private <R> CompletableFuture<List<R>> getFuture(List<CompletableFuture<R>> futures) {
+        CompletableFuture<List<R>> onDone = new CompletableFuture<>();
+        CompletableFuture<?>[] futureArray = new CompletableFuture<?>[futures.size()];
+        CompletableFuture.allOf((CompletableFuture<?>[]) futures.toArray(futureArray)).whenComplete((aVoid, throwable) -> {
+            if (throwable != null) {
+                onDone.completeExceptionally(throwable);
+            } else {
+                onDone.complete(futures.stream().map(CompletableFuture::join).collect(Collectors.toList()));
+            }
+        });
+        return onDone;
+    }
+
     // </editor-fold>
     /* ======================================================================================== */
     //<editor-fold desc="// TaskHolder">
