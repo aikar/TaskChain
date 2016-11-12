@@ -33,14 +33,18 @@
     <distributionManagement>
         <repository>
             <id>aikar</id>
-            <url>http://ci.emc.gs/nexus/content/repositories/aikar/</url>
+            <url>http://ci.emc.gs/nexus/content/repositories/aikar-release/</url>
         </repository>
+        <snapshotRepository>
+            <id>aikar</id>
+            <url>http://ci.emc.gs/nexus/content/repositories/aikar-snapshots/</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <repositories>
         <repository>
             <id>aikar</id>
-            <url>http://ci.emc.gs/nexus/content/repositories/aikar/</url>
+            <url>http://ci.emc.gs/nexus/content/groups/aikar/</url>
         </repository>
     </repositories>
 
