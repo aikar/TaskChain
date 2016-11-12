@@ -73,9 +73,9 @@ public class TaskChainExample {
             .async(() -> TaskChainUtil.log("this should run at same time as 2nd test"))
             .execute((finished) -> TaskChainUtil.log("TEST2 finished: " + finished));
         factory.newChain()
-            .asyncFirst(() -> 42)
-            .asyncLast((i) -> {
-                throw new RuntimeException("Got " + i);
+            .asyncFirst(() -> TaskChain.multi(42, "Foo", 4.32F))
+            .asyncLast((d) -> {
+                throw new RuntimeException("Got " + d.var1 +", " + d.var2 + ", " + d.var3);
             })
             .execute((finished) -> TaskChainUtil.log("Finished error chain: " + finished), (e, task) -> {
                 TaskChainUtil.logError("Got Exception on task " + task.getClass().getName() + ":" + e.getMessage());
