@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id=":bukkit:test" external.linked.project.path="$MODULE_DIR$/../../../bukkit" external.root.project.path="$MODULE_DIR$/../../.." external.system.id="GRADLE" external.system.module.group="co.aikar" external.system.module.type="sourceSet" external.system.module.version="3.3.5-SNAPSHOT" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="false">
+    <output-test url="file://$MODULE_DIR$/../../../bukkit/build/classes/test" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../../bukkit/src/test">
+      <sourceFolder url="file://$MODULE_DIR$/../../../bukkit/src/test/java" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../../../bukkit/src/test/resources" type="java-test-resource" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="bukkit_main" />
+    <orderEntry type="module" module-name="core_main" />
+  </component>
+  <component name="TestModuleProperties" production-module="bukkit_main" />
+</module>
