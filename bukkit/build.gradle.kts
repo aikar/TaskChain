@@ -30,6 +30,10 @@ buildscript {
     }
 }
 
+apply {
+    plugin("com.github.johnrengelman.shadow")
+}
+
 repositories {
     mavenCentral()
     maven {
