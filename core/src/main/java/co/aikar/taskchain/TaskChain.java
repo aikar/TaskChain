@@ -129,6 +129,42 @@ public class TaskChain <T> {
     // </editor-fold>
     /* ======================================================================================== */
     //<editor-fold desc="// API Methods">
+
+    /**
+     * Creates a data wrapper to return multiple objects from a task
+     */
+    public static <D1, D2> TaskChainDataWrappers.Data2<D1, D2> multi(D1 var1, D2 var2) {
+        return new TaskChainDataWrappers.Data2<>(var1, var2);
+    }
+
+    /**
+     * Creates a data wrapper to return multiple objects from a task
+     */
+    public static <D1, D2, D3> TaskChainDataWrappers.Data3<D1, D2, D3> multi(D1 var1, D2 var2, D3 var3) {
+        return new TaskChainDataWrappers.Data3<>(var1, var2, var3);
+    }
+
+    /**
+     * Creates a data wrapper to return multiple objects from a task
+     */
+    public static <D1, D2, D3, D4> TaskChainDataWrappers.Data4<D1, D2, D3, D4> multi(D1 var1, D2 var2, D3 var3, D4 var4) {
+        return new TaskChainDataWrappers.Data4<>(var1, var2, var3, var4);
+    }
+
+    /**
+     * Creates a data wrapper to return multiple objects from a task
+     */
+    public static <D1, D2, D3, D4, D5> TaskChainDataWrappers.Data5<D1, D2, D3, D4, D5> multi(D1 var1, D2 var2, D3 var3, D4 var4, D5 var5) {
+        return new TaskChainDataWrappers.Data5<>(var1, var2, var3, var4, var5);
+    }
+
+    /**
+     * Creates a data wrapper to return multiple objects from a task
+     */
+    public static <D1, D2, D3, D4, D5, D6> TaskChainDataWrappers.Data6<D1, D2, D3, D4, D5, D6> multi(D1 var1, D2 var2, D3 var3, D4 var4, D5 var5, D6 var6) {
+        return new TaskChainDataWrappers.Data6<>(var1, var2, var3, var4, var5, var6);
+    }
+
     /**
      * Call to abort execution of the chain. Should be called inside of an executing task.
      */
