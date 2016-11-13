@@ -23,18 +23,30 @@
 
 package co.aikar.taskchain;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
 public class TaskChainExample {
     /**
      * A useless example of registering multiple task signatures and states
      */
     public static void example(TaskChainFactory factory) {
         TaskChainUtil.log("Starting example");
+        final AsyncQueue asyncQueue = factory.getImplementation().getAsyncQueue();
+
+        CompletableFuture<Integer> f1 = new CompletableFuture<>(); // 5
+        CompletableFuture<Integer> f2 = new CompletableFuture<>(); // 3
+        CompletableFuture<Integer> f3 = new CompletableFuture<>(); // 8
+
         TaskChain<?> chain = factory.newSharedChain("TEST");
         chain
             .delay(20 * 3)
             .sync(() -> {
-                Object test = chain.setTaskData("test", 1);
-                TaskChainUtil.log("==> 1st test");
+                chain.setTaskData("test", 1);
+                TaskChainUtil.log("==> 1st test - completing f3 with 8");
+                f3.complete(8);
             })
             .delay(20)
             .async(() -> {
@@ -44,9 +56,31 @@ public class TaskChainExample {
             .sync(TaskChain::abort)
             .execute((finished) -> TaskChainUtil.log("first test finished: " + finished));
 
+        CompletableFuture<String> falready = new CompletableFuture<>();
+        falready.complete("FOO!");
+        factory.newChain()
+                .current(() -> TaskChainUtil.log("Starting Future task"))
+                .futures(f1, f2, f3)
+                .syncFutures((lists) -> {
+                    final Integer sum = lists.stream().collect(Collectors.summingInt(i -> i));
+                    TaskChainUtil.log("Future complete! got " + lists.size() + " answers that sum to (expect 16): " + sum);
+                    List<CompletableFuture<String>> ret = new ArrayList<>();
+                    CompletableFuture<String> other = new CompletableFuture<>();
+                    asyncQueue.postAsync(() -> other.complete("Result: " + sum));
+                    ret.add(falready);
+                    ret.add(other);
+                    return ret;
+                })
+                .currentLast((results) -> {
+                    TaskChainUtil.log("Results from last future task");
+                    for (String result : results) {
+                        TaskChainUtil.log(result);
+                    }
+                })
+                .execute();
 
         // This chain essentially appends onto the previous one, and will not overlap
-        factory.getImplementation().postAsync(() -> {
+        asyncQueue.postAsync(() -> {
             TaskChain<?> chain2 = factory.newSharedChain("TEST");
             chain2
                 .sync(() -> {
@@ -54,7 +88,10 @@ public class TaskChainExample {
                     TaskChainUtil.log("==> 3rd test: " + test + " = should be null");
                 })
                 .delay(20)
-                .current(() -> TaskChainUtil.log("test 2nd chain 20 ticks later"))
+                .current(() -> {
+                    TaskChainUtil.log("test 2nd chain 20 ticks later - completing f2 with 3");
+                    f2.complete(3);
+                })
                 .execute((finished) -> TaskChainUtil.log("second test finished: " + finished));
 
             factory
@@ -88,24 +125,44 @@ public class TaskChainExample {
             .<Integer>asyncFirstCallback(next -> {
                 // Use a callback to provide result
                 TaskChainUtil.log("this also ran async, but will call next task in 3 seconds.");
-                factory.getImplementation().scheduleTask(60, () -> next.accept(3));
+                factory.getImplementation().scheduleTask(60, () -> {
+                    TaskChainUtil.log("completing f1 with 5");
+                    f1.complete(5);
+                    next.accept(3);
+                });
             })
             .sync(input -> { // Will be ran 3s later but didn't use .delay()
                 TaskChainUtil.log("should of got 3: " + input);
                 return 5 + input;
             })
+            .asyncFuture((foo) -> {
+                CompletableFuture<Integer> future = new CompletableFuture<>();
+                asyncQueue.postAsync(() -> {
+                    TaskChainUtil.log("Sleeping 1 before completing future");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    future.complete(foo + 10);
+                });
+                TaskChainUtil.log("Returning Future");
+                return future;
+            })
             .storeAsData("Test1")
-            .syncLast(input2 -> TaskChainUtil.log("should be 8: " + input2)) // Consumes last result, but doesn't pass a new one
+            .syncLast(input2 -> TaskChainUtil.log("should be 18: " + input2)) // Consumes last result, but doesn't pass a new one
             .delay(20) // Wait 1s until next
             .sync(() -> TaskChainUtil.log("Generic 1s later")) // no input expected, no output, run sync
             .asyncFirst(() -> 3) // Run task async and return 3
             .delay(5 * 20) // Wait 5s
-            .asyncLast(input1 -> TaskChainUtil.log("async last value 5s later: " + input1)) // Run async again, with value of 3
+            .asyncLast(input1 -> TaskChainUtil.log("async last value 5s later should be 3: " + input1)) // Run async again, with value of 3
             .<Integer>returnData("Test1")
-            .asyncLast((val) -> TaskChainUtil.log("Should of got 8 back from data: " + val))
+            .asyncLast((val) -> TaskChainUtil.log("Should of got 18 back from data: " + val))
             .<Integer>returnData("Test1")
-            .abortIf(8)
+            .abortIf(18)
             .sync(() -> TaskChainUtil.log("Shouldn't be called"))
             .execute((finished) -> TaskChainUtil.log("final test chain finished: " + finished));
+
+
     }
 }
