@@ -1,4 +1,9 @@
 # TaskChain Changelog
+## Version 3.4.0
+* New: Futures API - Developers may use the Java 8 "Promise" API CompleteableFuture as a way to control chain execution instead of the AsyncExecuting Callback method. Futures are much more powerful than the Callback style.
+* New: Data Wrappers - You may now use TaskChain.multi(result1, result2, result3) to return multiple values from a task, to be accessed on the next task. This replaces the need to use the Task Data map temporarily between tasks to pass multiple values.
+* Experimental: Support for Sponge (#1) has been added using Sponge API v6.0.0-SNAPSHOT. This is untested. 
+
 ## Version 3.3.4
 * Rewrote the SharedTaskChain logic. All 3.x versions before this is assumed to have broken Shared Task Chain logic with rare concurrency issues.
 
