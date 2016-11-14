@@ -1,5 +1,6 @@
 # TaskChain Changelog
-## Version 3.4.1
+
+## Version 3.4.2
 * Fixed: Concurrency Issue with Shared Chains and double execution
 
 ## Version 3.4.0
