@@ -21,5 +21,6 @@ git tag -a -m "$version" $version
 
 ./version.sh "$next"
 git commit -m "Prepare for development $next" ${files[@]}
+git push origin master
 git push --tags origin master
 
