@@ -36,7 +36,7 @@ class SharedTaskChain<R> extends TaskChain<R> {
     private final String name;
     private final Map<String, Queue<SharedTaskChain>> sharedChains;
     private Queue<SharedTaskChain> queue;
-    private boolean isReady;
+    private volatile boolean isPending;
 
     SharedTaskChain(String name, TaskChainFactory factory) {
         super(factory);
@@ -62,10 +62,10 @@ class SharedTaskChain<R> extends TaskChain<R> {
             processQueue();
         });
 
-        synchronized (sharedChains) {
-            isReady = true;
+        synchronized (this.sharedChains) {
+            this.isPending = this.queue.peek() != this;
         }
-        if (queue.peek() == this) {
+        if (!this.isPending) {
             execute0();
         }
     }
@@ -82,7 +82,7 @@ class SharedTaskChain<R> extends TaskChain<R> {
                 this.sharedChains.remove(this.name);
                 return;
             }
-            if (!next.isReady) {
+            if (!next.isPending) {
                 // Created but wasn't executed yet. Wait until the chain executes itself.
                 return;
             }
