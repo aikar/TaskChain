@@ -1,4 +1,7 @@
 # TaskChain Changelog
+## Version 3.4.1
+* Fixed: Concurrency Issue with Shared Chains and double execution
+
 ## Version 3.4.0
 * New: Futures API - Developers may use the Java 8 "Promise" API CompleteableFuture as a way to control chain execution instead of the AsyncExecuting Callback method. Futures are much more powerful than the Callback style.
 * New: Data Wrappers - You may now use TaskChain.multi(result1, result2, result3) to return multiple values from a task, to be accessed on the next task. This replaces the need to use the Task Data map temporarily between tasks to pass multiple values.
