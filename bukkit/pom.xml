@@ -28,12 +28,12 @@
     <parent>
         <groupId>co.aikar</groupId>
         <artifactId>taskchain-parent</artifactId>
-        <version><!--VERSION-->3.4.1<!--VERSION--></version>
+        <version><!--VERSION-->3.4.2-SNAPSHOT<!--VERSION--></version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>taskchain-bukkit</artifactId>
-    <version><!--VERSION-->3.4.1<!--VERSION--></version>
+    <version><!--VERSION-->3.4.2-SNAPSHOT<!--VERSION--></version>
     <packaging>jar</packaging>
     <name>TaskChain (Bukkit)</name>
 
@@ -48,7 +48,7 @@
         <dependency>
             <groupId>co.aikar</groupId>
             <artifactId>taskchain-core</artifactId>
-            <version><!--VERSION-->3.4.1<!--VERSION--></version>
+            <version><!--VERSION-->3.4.2-SNAPSHOT<!--VERSION--></version>
         </dependency>
         <dependency>
             <groupId>org.bukkit</groupId>
