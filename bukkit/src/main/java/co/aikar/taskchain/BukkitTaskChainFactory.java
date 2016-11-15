@@ -31,26 +31,35 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.Plugin;
 
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class BukkitTaskChainFactory extends TaskChainFactory {
-    private BukkitTaskChainFactory(Plugin plugin) {
-        super(new BukkitGameInterface(plugin));
+    private BukkitTaskChainFactory(Plugin plugin, AsyncQueue asyncQueue) {
+        super(new BukkitGameInterface(plugin, asyncQueue));
     }
 
     public static TaskChainFactory create(Plugin plugin) {
-        return new BukkitTaskChainFactory(plugin);
+        return new BukkitTaskChainFactory(plugin, new TaskChainAsyncQueue());
     }
+/* @TODO: #9 - Not Safe to do this
+    public static TaskChainFactory create(Plugin plugin, ThreadPoolExecutor executor) {
+        return new BukkitTaskChainFactory(plugin, new TaskChainAsyncQueue(executor));
+    }
+
+    public static TaskChainFactory create(Plugin plugin, AsyncQueue asyncQueue) {
+        return new BukkitTaskChainFactory(plugin, asyncQueue);
+    }*/
 
     @SuppressWarnings("PublicInnerClass")
     private static class BukkitGameInterface implements GameInterface {
         private final Plugin plugin;
         private final AsyncQueue asyncQueue;
 
-        BukkitGameInterface(Plugin plugin) {
+        BukkitGameInterface(Plugin plugin, AsyncQueue asyncQueue) {
             this.plugin = plugin;
-            this.asyncQueue = new TaskChainAsyncQueue();
+            this.asyncQueue = asyncQueue;
         }
 
         @Override

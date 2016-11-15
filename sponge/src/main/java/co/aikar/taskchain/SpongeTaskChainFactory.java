@@ -28,31 +28,41 @@ import org.spongepowered.api.event.game.state.GameStoppingEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings("WeakerAccess")
 public class SpongeTaskChainFactory extends TaskChainFactory {
-    private SpongeTaskChainFactory(GameInterface impl) {
-        super(impl);
+    private SpongeTaskChainFactory(Object plugin, AsyncQueue asyncQueue) {
+        super(new SpongeGameInterface(plugin, asyncQueue));
     }
 
     public static TaskChainFactory create(PluginContainer pluginContainer) {
         return create(pluginContainer.getInstance().orElse(null));
     }
     public static TaskChainFactory create(Object plugin) {
-        return new SpongeTaskChainFactory(new SpongeGameInterface(plugin));
+        return new SpongeTaskChainFactory(plugin, new TaskChainAsyncQueue());
+    }
+/* @TODO: #9 - Not Safe to do this
+    public static TaskChainFactory create(Object plugin, ThreadPoolExecutor executor) {
+        return new SpongeTaskChainFactory(new SpongeGameInterface(plugin, new TaskChainAsyncQueue(executor)));
     }
 
-    private static class SpongeGameInterface implements GameInterface {
-        private final AsyncQueue asyncQueue;
-        private final Object plugin;
+    public static TaskChainFactory create(Object plugin, AsyncQueue asyncQueue) {
+        return new SpongeTaskChainFactory(new SpongeGameInterface(plugin, asyncQueue));
+    }*/
 
-        private SpongeGameInterface(Object plugin) {
+
+    private static class SpongeGameInterface implements GameInterface {
+        private final Object plugin;
+        private final AsyncQueue asyncQueue;
+
+        private SpongeGameInterface(Object plugin, AsyncQueue asyncQueue) {
+            this.asyncQueue = asyncQueue;
             if (plugin == null || !Sponge.getPluginManager().fromInstance(plugin).isPresent()) {
                 throw new IllegalArgumentException("Not a valid Sponge Plugin");
             }
             this.plugin = plugin;
-            this.asyncQueue = new TaskChainAsyncQueue();
         }
 
         @Override
