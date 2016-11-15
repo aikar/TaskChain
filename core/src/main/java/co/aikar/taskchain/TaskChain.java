@@ -50,18 +50,7 @@ import java.util.stream.Collectors;
 
 
 /**
- * TaskChain v3.0 - by Daniel Ennis <aikar@aikar.co>
- *
- * Facilitates Control Flow for a game scheduler to easily jump between
- * Async and Sync execution states without deeply nested callbacks,
- * passing the response of the previous task to the next task to use.
- *
- * Also can be used to guarantee execution order to 2 ensure
- * that 2 related actions can never run at same time, and 1 set of tasks
- * will not start executing until the previous set is finished.
- *
- *
- * Find latest updates at https://taskchain.emc.gs
+ * The Main API class of TaskChain. TaskChain's are created by a {@link TaskChainFactory}
  */
 @SuppressWarnings({"unused", "FieldAccessedSynchronizedAndUnsynchronized"})
 public class TaskChain <T> {
@@ -255,7 +244,7 @@ public class TaskChain <T> {
     /**
      * Reads the specified key from Task Data, and passes it to the next task.
      *
-     * Will need to pass expected type such as chain.<Foo>returnData("key")
+     * Will need to pass expected type such as chain.&lt;Foo&gt;returnData("key")
      *
      * @param key Key to retrieve from Task Data and pass to next task
      * @param <R> Return type that the next parameter can expect as argument type
@@ -320,7 +309,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * {@link #abortIf(T, TaskChainAbortAction, Object, Object, Object)}
+     * {@link TaskChain#abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
     public TaskChain<T> abortIfNull(TaskChainAbortAction<?, ?, ?> action) {
@@ -328,7 +317,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * {@link #abortIf(T, TaskChainAbortAction, Object, Object, Object)}
+     * {@link TaskChain#abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
     public <A1> TaskChain<T> abortIfNull(TaskChainAbortAction<A1, ?, ?> action, A1 arg1) {
@@ -337,7 +326,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * {@link #abortIf(T, TaskChainAbortAction, Object, Object, Object)}
+     * {@link TaskChain#abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
     public <A1, A2> TaskChain<T> abortIfNull(TaskChainAbortAction<A1, A2, ?> action, A1 arg1, A2 arg2) {
@@ -368,7 +357,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * {@link #abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
+     * {@link TaskChain#abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
     public TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<?, ?, ?> action) {
@@ -376,7 +365,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * {@link #abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
+     * {@link TaskChain#abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
     public <A1> TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<A1, ?, ?> action, A1 arg1) {
@@ -384,7 +373,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * {@link #abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
+     * {@link TaskChain#abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
     public <A1, A2> TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<A1, A2, ?> action, A1 arg1, A2 arg2) {
@@ -419,7 +408,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * {@link #abortIfNot(Object, TaskChainAbortAction, Object, Object, Object)}
+     * {@link TaskChain#abortIfNot(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
     public TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<?, ?, ?> action) {
@@ -427,7 +416,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * {@link #abortIfNot(Object, TaskChainAbortAction, Object, Object, Object)}
+     * {@link TaskChain#abortIfNot(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
     public <A1> TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<A1, ?, ?> action, A1 arg1) {
@@ -435,7 +424,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * {@link #abortIfNot(Object, TaskChainAbortAction, Object, Object, Object)}
+     * {@link TaskChain#abortIfNot(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
     public <A1, A2> TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<A1, A2, ?> action, A1 arg1, A2 arg2) {
@@ -487,7 +476,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncFirstCallback(AsyncExecutingFirstTask) but ran off main thread
+     * {@link TaskChain#syncFirstCallback(AsyncExecutingFirstTask)} but ran off main thread
      * @param task The task to execute
      * @param <R> Return type that the next parameter can expect as argument type
      */
@@ -498,7 +487,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncFirstCallback(AsyncExecutingFirstTask) but ran on current thread the Chain was created on
+     * {@link TaskChain#syncFirstCallback(AsyncExecutingFirstTask)} but ran on current thread the Chain was created on
      * @param task The task to execute
      * @param <R> Return type that the next parameter can expect as argument type
      */
@@ -530,7 +519,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncCallback(AsyncExecutingTask), ran on main thread but no input or output
+     * {@link TaskChain#syncCallback(AsyncExecutingTask)}, ran on main thread but no input or output
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
@@ -539,7 +528,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncCallback(AsyncExecutingTask) but ran off main thread
+     * {@link TaskChain#syncCallback(AsyncExecutingTask)} but ran off main thread
      * @param task The task to execute
      * @param <R> Return type that the next parameter can expect as argument type
      */
@@ -550,7 +539,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncCallback(AsyncExecutingTask) but ran off main thread
+     * {@link TaskChain#syncCallback(AsyncExecutingTask)} but ran off main thread
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
@@ -559,7 +548,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncCallback(AsyncExecutingTask) but ran on current thread the Chain was created on
+     * {@link TaskChain#syncCallback(AsyncExecutingTask)} but ran on current thread the Chain was created on
      * @param task The task to execute
      * @param <R> Return type that the next parameter can expect as argument type
      */
@@ -570,7 +559,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncCallback(AsyncExecutingTask) but ran on current thread the Chain was created on
+     * {@link TaskChain#syncCallback(AsyncExecutingTask)} but ran on current thread the Chain was created on
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
@@ -730,7 +719,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncFirstFuture(FutureFirstTask) but ran off main thread
+     * {@link TaskChain#syncFirstFuture(FutureFirstTask)} but ran off main thread
      * @param task The task to execute
      * @param <R> Return type that the next parameter can expect as argument type
      */
@@ -741,7 +730,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncFirstFuture(FutureFirstTask) but ran on current thread the Chain was created on
+     * {@link TaskChain#syncFirstFuture(FutureFirstTask)} but ran on current thread the Chain was created on
      * @param task The task to execute
      * @param <R> Return type that the next parameter can expect as argument type
      */
@@ -768,7 +757,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncFuture(FutureTask), ran on main thread but no input or output
+     * {@link TaskChain#syncFuture(FutureTask)}, ran on main thread but no input or output
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
@@ -777,7 +766,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncFuture(FutureTask) but the future provider is ran off main thread
+     * {@link TaskChain#syncFuture(FutureTask)} but the future provider is ran off main thread
      * @param task The task to execute
      * @param <R> Return type that the next parameter can expect as argument type
      */
@@ -788,7 +777,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncFuture(FutureTask) but the future provider is ran off main thread
+     * {@link TaskChain#syncFuture(FutureTask)} but the future provider is ran off main thread
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
@@ -797,7 +786,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncFuture(FutureTask) but the future provider is ran on current thread the Chain was created on
+     * {@link TaskChain#syncFuture(FutureTask)} but the future provider is ran on current thread the Chain was created on
      * @param task The task to execute
      * @param <R> Return type that the next parameter can expect as argument type
      */
@@ -808,7 +797,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncFuture(FutureTask) but the future provider is ran on current thread the Chain was created on
+     * {@link TaskChain#syncFuture(FutureTask)} but the future provider is ran on current thread the Chain was created on
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
@@ -834,7 +823,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncFirst(FirstTask) but ran off main thread
+     * {@link TaskChain#syncFirst(FirstTask)} but ran off main thread
      * @param task The task to execute
      * @param <R> Return type that the next parameter can expect as argument type
      */
@@ -845,7 +834,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncFirst(FirstTask) but ran on current thread the Chain was created on
+     * {@link TaskChain#syncFirst(FirstTask)} but ran on current thread the Chain was created on
      * @param task The task to execute
      * @param <R> Return type that the next parameter can expect as argument type
      */
@@ -876,7 +865,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #sync(Task) but ran off main thread
+     * {@link TaskChain#sync(Task)} but ran off main thread
      * @param task The task to execute
      * @param <R> Return type that the next parameter can expect as argument type
      */
@@ -887,7 +876,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #sync(GenericTask) but ran off main thread
+     * {@link TaskChain#sync(GenericTask)} but ran off main thread
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
@@ -896,7 +885,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #sync(Task) but ran on current thread the Chain was created on
+     * {@link TaskChain#sync(Task)} but ran on current thread the Chain was created on
      * @param task The task to execute
      * @param <R> Return type that the next parameter can expect as argument type
      */
@@ -907,7 +896,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #sync(GenericTask) but ran on current thread the Chain was created on
+     * {@link TaskChain#sync(GenericTask)} but ran on current thread the Chain was created on
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
@@ -926,7 +915,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncLast(LastTask) but ran off main thread
+     * {@link TaskChain#syncLast(LastTask)} but ran off main thread
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
@@ -935,7 +924,7 @@ public class TaskChain <T> {
     }
 
     /**
-     * @see #syncLast(LastTask) but ran on current thread the Chain was created on
+     * {@link TaskChain#syncLast(LastTask)} but ran on current thread the Chain was created on
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
