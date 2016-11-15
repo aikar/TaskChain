@@ -29,6 +29,9 @@ TaskChain then executes your task pipe line, switching thread context where need
 ### Want to add your own game?
 If you wish to add support for your own game, see [Implementing a new game](https://github.com/aikar/TaskChain/wiki/implementing-a-new-game)
 
+## JavaDocs
+JavaDocs can be found at [http://taskchain.aikar.co](http://taskchain.aikar.co)
+
 ## Changelog
 Please see [CHANGELOG](CHANGELOG.md)
 
