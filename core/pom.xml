@@ -45,6 +45,8 @@
                 <configuration>
                     <destDir>../docs</destDir>
                     <quiet>true</quiet>
+                    <notimestamp>true</notimestamp>
+                    <linksource>true</linksource>
                 </configuration>
                 <executions>
                     <execution>

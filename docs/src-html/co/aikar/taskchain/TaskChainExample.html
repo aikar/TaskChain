@@ -1,0 +1,240 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Source code</title>
+<link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
+</head>
+<body>
+<div class="sourceContainer">
+<pre><span class="sourceLineNo">001</span>/*<a name="line.1"></a>
+<span class="sourceLineNo">002</span> * Copyright (c) 2016 Daniel Ennis (Aikar) - MIT License<a name="line.2"></a>
+<span class="sourceLineNo">003</span> *<a name="line.3"></a>
+<span class="sourceLineNo">004</span> *  Permission is hereby granted, free of charge, to any person obtaining<a name="line.4"></a>
+<span class="sourceLineNo">005</span> *  a copy of this software and associated documentation files (the<a name="line.5"></a>
+<span class="sourceLineNo">006</span> *  "Software"), to deal in the Software without restriction, including<a name="line.6"></a>
+<span class="sourceLineNo">007</span> *  without limitation the rights to use, copy, modify, merge, publish,<a name="line.7"></a>
+<span class="sourceLineNo">008</span> *  distribute, sublicense, and/or sell copies of the Software, and to<a name="line.8"></a>
+<span class="sourceLineNo">009</span> *  permit persons to whom the Software is furnished to do so, subject to<a name="line.9"></a>
+<span class="sourceLineNo">010</span> *  the following conditions:<a name="line.10"></a>
+<span class="sourceLineNo">011</span> *<a name="line.11"></a>
+<span class="sourceLineNo">012</span> *  The above copyright notice and this permission notice shall be<a name="line.12"></a>
+<span class="sourceLineNo">013</span> *  included in all copies or substantial portions of the Software.<a name="line.13"></a>
+<span class="sourceLineNo">014</span> *<a name="line.14"></a>
+<span class="sourceLineNo">015</span> *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,<a name="line.15"></a>
+<span class="sourceLineNo">016</span> *  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF<a name="line.16"></a>
+<span class="sourceLineNo">017</span> *  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND<a name="line.17"></a>
+<span class="sourceLineNo">018</span> *  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE<a name="line.18"></a>
+<span class="sourceLineNo">019</span> *  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION<a name="line.19"></a>
+<span class="sourceLineNo">020</span> *  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION<a name="line.20"></a>
+<span class="sourceLineNo">021</span> *  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.<a name="line.21"></a>
+<span class="sourceLineNo">022</span> */<a name="line.22"></a>
+<span class="sourceLineNo">023</span><a name="line.23"></a>
+<span class="sourceLineNo">024</span>package co.aikar.taskchain;<a name="line.24"></a>
+<span class="sourceLineNo">025</span><a name="line.25"></a>
+<span class="sourceLineNo">026</span>import java.util.ArrayList;<a name="line.26"></a>
+<span class="sourceLineNo">027</span>import java.util.List;<a name="line.27"></a>
+<span class="sourceLineNo">028</span>import java.util.concurrent.CompletableFuture;<a name="line.28"></a>
+<span class="sourceLineNo">029</span>import java.util.stream.Collectors;<a name="line.29"></a>
+<span class="sourceLineNo">030</span><a name="line.30"></a>
+<span class="sourceLineNo">031</span>public class TaskChainExample {<a name="line.31"></a>
+<span class="sourceLineNo">032</span>    /**<a name="line.32"></a>
+<span class="sourceLineNo">033</span>     * A useless example of registering multiple task signatures and states<a name="line.33"></a>
+<span class="sourceLineNo">034</span>     */<a name="line.34"></a>
+<span class="sourceLineNo">035</span>    public static void example(TaskChainFactory factory) {<a name="line.35"></a>
+<span class="sourceLineNo">036</span>        TaskChainUtil.log("Starting example");<a name="line.36"></a>
+<span class="sourceLineNo">037</span>        final AsyncQueue asyncQueue = factory.getImplementation().getAsyncQueue();<a name="line.37"></a>
+<span class="sourceLineNo">038</span><a name="line.38"></a>
+<span class="sourceLineNo">039</span>        CompletableFuture&lt;Integer&gt; f1 = new CompletableFuture&lt;&gt;(); // 5<a name="line.39"></a>
+<span class="sourceLineNo">040</span>        CompletableFuture&lt;Integer&gt; f2 = new CompletableFuture&lt;&gt;(); // 3<a name="line.40"></a>
+<span class="sourceLineNo">041</span>        CompletableFuture&lt;Integer&gt; f3 = new CompletableFuture&lt;&gt;(); // 8<a name="line.41"></a>
+<span class="sourceLineNo">042</span><a name="line.42"></a>
+<span class="sourceLineNo">043</span>        TaskChain&lt;?&gt; chain = factory.newSharedChain("TEST");<a name="line.43"></a>
+<span class="sourceLineNo">044</span>        chain<a name="line.44"></a>
+<span class="sourceLineNo">045</span>            .delay(20 * 3)<a name="line.45"></a>
+<span class="sourceLineNo">046</span>            .sync(() -&gt; {<a name="line.46"></a>
+<span class="sourceLineNo">047</span>                chain.setTaskData("test", 1);<a name="line.47"></a>
+<span class="sourceLineNo">048</span>                TaskChainUtil.log("==&gt; 1st test - completing f3 with 8");<a name="line.48"></a>
+<span class="sourceLineNo">049</span>                f3.complete(8);<a name="line.49"></a>
+<span class="sourceLineNo">050</span>            })<a name="line.50"></a>
+<span class="sourceLineNo">051</span>            .delay(20)<a name="line.51"></a>
+<span class="sourceLineNo">052</span>            .async(() -&gt; {<a name="line.52"></a>
+<span class="sourceLineNo">053</span>                Object test = chain.getTaskData("test");<a name="line.53"></a>
+<span class="sourceLineNo">054</span>                TaskChainUtil.log("==&gt; 2nd test: " + test + " = should be 1");<a name="line.54"></a>
+<span class="sourceLineNo">055</span>            })<a name="line.55"></a>
+<span class="sourceLineNo">056</span>            .sync(TaskChain::abort)<a name="line.56"></a>
+<span class="sourceLineNo">057</span>            .execute((finished) -&gt; TaskChainUtil.log("first test finished: " + finished));<a name="line.57"></a>
+<span class="sourceLineNo">058</span><a name="line.58"></a>
+<span class="sourceLineNo">059</span>        CompletableFuture&lt;String&gt; falready = new CompletableFuture&lt;&gt;();<a name="line.59"></a>
+<span class="sourceLineNo">060</span>        falready.complete("FOO!");<a name="line.60"></a>
+<span class="sourceLineNo">061</span>        factory.newChain()<a name="line.61"></a>
+<span class="sourceLineNo">062</span>                .current(() -&gt; TaskChainUtil.log("Starting Future task"))<a name="line.62"></a>
+<span class="sourceLineNo">063</span>                .futures(f1, f2, f3)<a name="line.63"></a>
+<span class="sourceLineNo">064</span>                .syncFutures((lists) -&gt; {<a name="line.64"></a>
+<span class="sourceLineNo">065</span>                    final Integer sum = lists.stream().collect(Collectors.summingInt(i -&gt; i));<a name="line.65"></a>
+<span class="sourceLineNo">066</span>                    TaskChainUtil.log("Future complete! got " + lists.size() + " answers that sum to (expect 16): " + sum);<a name="line.66"></a>
+<span class="sourceLineNo">067</span>                    List&lt;CompletableFuture&lt;String&gt;&gt; ret = new ArrayList&lt;&gt;();<a name="line.67"></a>
+<span class="sourceLineNo">068</span>                    CompletableFuture&lt;String&gt; other = new CompletableFuture&lt;&gt;();<a name="line.68"></a>
+<span class="sourceLineNo">069</span>                    asyncQueue.postAsync(() -&gt; other.complete("Result: " + sum));<a name="line.69"></a>
+<span class="sourceLineNo">070</span>                    ret.add(falready);<a name="line.70"></a>
+<span class="sourceLineNo">071</span>                    ret.add(other);<a name="line.71"></a>
+<span class="sourceLineNo">072</span>                    return ret;<a name="line.72"></a>
+<span class="sourceLineNo">073</span>                })<a name="line.73"></a>
+<span class="sourceLineNo">074</span>                .currentLast((results) -&gt; {<a name="line.74"></a>
+<span class="sourceLineNo">075</span>                    TaskChainUtil.log("Results from last future task");<a name="line.75"></a>
+<span class="sourceLineNo">076</span>                    for (String result : results) {<a name="line.76"></a>
+<span class="sourceLineNo">077</span>                        TaskChainUtil.log(result);<a name="line.77"></a>
+<span class="sourceLineNo">078</span>                    }<a name="line.78"></a>
+<span class="sourceLineNo">079</span>                })<a name="line.79"></a>
+<span class="sourceLineNo">080</span>                .execute();<a name="line.80"></a>
+<span class="sourceLineNo">081</span><a name="line.81"></a>
+<span class="sourceLineNo">082</span>        // This chain essentially appends onto the previous one, and will not overlap<a name="line.82"></a>
+<span class="sourceLineNo">083</span>        asyncQueue.postAsync(() -&gt; {<a name="line.83"></a>
+<span class="sourceLineNo">084</span>            TaskChain&lt;?&gt; chain2 = factory.newSharedChain("TEST");<a name="line.84"></a>
+<span class="sourceLineNo">085</span>            chain2<a name="line.85"></a>
+<span class="sourceLineNo">086</span>                .sync(() -&gt; {<a name="line.86"></a>
+<span class="sourceLineNo">087</span>                    Object test = chain2.getTaskData("test");<a name="line.87"></a>
+<span class="sourceLineNo">088</span>                    TaskChainUtil.log("==&gt; 3rd test: " + test + " = should be null");<a name="line.88"></a>
+<span class="sourceLineNo">089</span>                })<a name="line.89"></a>
+<span class="sourceLineNo">090</span>                .delay(20)<a name="line.90"></a>
+<span class="sourceLineNo">091</span>                .current(() -&gt; {<a name="line.91"></a>
+<span class="sourceLineNo">092</span>                    TaskChainUtil.log("test 2nd chain 20 ticks later - completing f2 with 3");<a name="line.92"></a>
+<span class="sourceLineNo">093</span>                    f2.complete(3);<a name="line.93"></a>
+<span class="sourceLineNo">094</span>                })<a name="line.94"></a>
+<span class="sourceLineNo">095</span>                .execute((finished) -&gt; TaskChainUtil.log("second test finished: " + finished));<a name="line.95"></a>
+<span class="sourceLineNo">096</span><a name="line.96"></a>
+<span class="sourceLineNo">097</span>            factory<a name="line.97"></a>
+<span class="sourceLineNo">098</span>                .newSharedChain("TEST")<a name="line.98"></a>
+<span class="sourceLineNo">099</span>                .async(() -&gt; TaskChainUtil.log("==&gt; 4th test - should print"))<a name="line.99"></a>
+<span class="sourceLineNo">100</span>                .returnData("notthere")<a name="line.100"></a>
+<span class="sourceLineNo">101</span>                .abortIfNull()<a name="line.101"></a>
+<span class="sourceLineNo">102</span>                .syncLast((val) -&gt; TaskChainUtil.log("Shouldn't execute due to null abort"))<a name="line.102"></a>
+<span class="sourceLineNo">103</span>                .execute(() -&gt; TaskChainUtil.log("finished runnable based test"));<a name="line.103"></a>
+<span class="sourceLineNo">104</span>        });<a name="line.104"></a>
+<span class="sourceLineNo">105</span>        factory<a name="line.105"></a>
+<span class="sourceLineNo">106</span>            .newSharedChain("TEST2")<a name="line.106"></a>
+<span class="sourceLineNo">107</span>            .delay(20 * 3)<a name="line.107"></a>
+<span class="sourceLineNo">108</span>            .sync(() -&gt; TaskChainUtil.log("this should run at same time as 1st test"))<a name="line.108"></a>
+<span class="sourceLineNo">109</span>            .delay(20)<a name="line.109"></a>
+<span class="sourceLineNo">110</span>            .async(() -&gt; TaskChainUtil.log("this should run at same time as 2nd test"))<a name="line.110"></a>
+<span class="sourceLineNo">111</span>            .execute((finished) -&gt; TaskChainUtil.log("TEST2 finished: " + finished));<a name="line.111"></a>
+<span class="sourceLineNo">112</span>        factory.newChain()<a name="line.112"></a>
+<span class="sourceLineNo">113</span>            .asyncFirst(() -&gt; TaskChain.multi(42, "Foo", 4.32F))<a name="line.113"></a>
+<span class="sourceLineNo">114</span>            .asyncLast((d) -&gt; {<a name="line.114"></a>
+<span class="sourceLineNo">115</span>                throw new RuntimeException("Got " + d.var1 +", " + d.var2 + ", " + d.var3);<a name="line.115"></a>
+<span class="sourceLineNo">116</span>            })<a name="line.116"></a>
+<span class="sourceLineNo">117</span>            .execute((finished) -&gt; TaskChainUtil.log("Finished error chain: " + finished), (e, task) -&gt; {<a name="line.117"></a>
+<span class="sourceLineNo">118</span>                TaskChainUtil.logError("Got Exception on task " + task.getClass().getName() + ":" + e.getMessage());<a name="line.118"></a>
+<span class="sourceLineNo">119</span>            });<a name="line.119"></a>
+<span class="sourceLineNo">120</span>        factory<a name="line.120"></a>
+<span class="sourceLineNo">121</span>            .newChain()<a name="line.121"></a>
+<span class="sourceLineNo">122</span>            .sync(() -&gt; TaskChainUtil.log("THE FIRST!"))<a name="line.122"></a>
+<span class="sourceLineNo">123</span>            .delay(20 * 10) // Wait 20s to start any task<a name="line.123"></a>
+<span class="sourceLineNo">124</span>            .async(() -&gt; TaskChainUtil.log("This ran async - with no input or return"))<a name="line.124"></a>
+<span class="sourceLineNo">125</span>            .&lt;Integer&gt;asyncFirstCallback(next -&gt; {<a name="line.125"></a>
+<span class="sourceLineNo">126</span>                // Use a callback to provide result<a name="line.126"></a>
+<span class="sourceLineNo">127</span>                TaskChainUtil.log("this also ran async, but will call next task in 3 seconds.");<a name="line.127"></a>
+<span class="sourceLineNo">128</span>                factory.getImplementation().scheduleTask(60, () -&gt; {<a name="line.128"></a>
+<span class="sourceLineNo">129</span>                    TaskChainUtil.log("completing f1 with 5");<a name="line.129"></a>
+<span class="sourceLineNo">130</span>                    f1.complete(5);<a name="line.130"></a>
+<span class="sourceLineNo">131</span>                    next.accept(3);<a name="line.131"></a>
+<span class="sourceLineNo">132</span>                });<a name="line.132"></a>
+<span class="sourceLineNo">133</span>            })<a name="line.133"></a>
+<span class="sourceLineNo">134</span>            .sync(input -&gt; { // Will be ran 3s later but didn't use .delay()<a name="line.134"></a>
+<span class="sourceLineNo">135</span>                TaskChainUtil.log("should of got 3: " + input);<a name="line.135"></a>
+<span class="sourceLineNo">136</span>                return 5 + input;<a name="line.136"></a>
+<span class="sourceLineNo">137</span>            })<a name="line.137"></a>
+<span class="sourceLineNo">138</span>            .asyncFuture((foo) -&gt; {<a name="line.138"></a>
+<span class="sourceLineNo">139</span>                CompletableFuture&lt;Integer&gt; future = new CompletableFuture&lt;&gt;();<a name="line.139"></a>
+<span class="sourceLineNo">140</span>                asyncQueue.postAsync(() -&gt; {<a name="line.140"></a>
+<span class="sourceLineNo">141</span>                    TaskChainUtil.log("Sleeping 1 before completing future");<a name="line.141"></a>
+<span class="sourceLineNo">142</span>                    try {<a name="line.142"></a>
+<span class="sourceLineNo">143</span>                        Thread.sleep(1000);<a name="line.143"></a>
+<span class="sourceLineNo">144</span>                    } catch (InterruptedException e) {<a name="line.144"></a>
+<span class="sourceLineNo">145</span>                        e.printStackTrace();<a name="line.145"></a>
+<span class="sourceLineNo">146</span>                    }<a name="line.146"></a>
+<span class="sourceLineNo">147</span>                    future.complete(foo + 10);<a name="line.147"></a>
+<span class="sourceLineNo">148</span>                });<a name="line.148"></a>
+<span class="sourceLineNo">149</span>                TaskChainUtil.log("Returning Future");<a name="line.149"></a>
+<span class="sourceLineNo">150</span>                return future;<a name="line.150"></a>
+<span class="sourceLineNo">151</span>            })<a name="line.151"></a>
+<span class="sourceLineNo">152</span>            .storeAsData("Test1")<a name="line.152"></a>
+<span class="sourceLineNo">153</span>            .syncLast(input2 -&gt; TaskChainUtil.log("should be 18: " + input2)) // Consumes last result, but doesn't pass a new one<a name="line.153"></a>
+<span class="sourceLineNo">154</span>            .delay(20) // Wait 1s until next<a name="line.154"></a>
+<span class="sourceLineNo">155</span>            .sync(() -&gt; TaskChainUtil.log("Generic 1s later")) // no input expected, no output, run sync<a name="line.155"></a>
+<span class="sourceLineNo">156</span>            .asyncFirst(() -&gt; 3) // Run task async and return 3<a name="line.156"></a>
+<span class="sourceLineNo">157</span>            .delay(5 * 20) // Wait 5s<a name="line.157"></a>
+<span class="sourceLineNo">158</span>            .asyncLast(input1 -&gt; TaskChainUtil.log("async last value 5s later should be 3: " + input1)) // Run async again, with value of 3<a name="line.158"></a>
+<span class="sourceLineNo">159</span>            .&lt;Integer&gt;returnData("Test1")<a name="line.159"></a>
+<span class="sourceLineNo">160</span>            .asyncLast((val) -&gt; TaskChainUtil.log("Should of got 18 back from data: " + val))<a name="line.160"></a>
+<span class="sourceLineNo">161</span>            .&lt;Integer&gt;returnData("Test1")<a name="line.161"></a>
+<span class="sourceLineNo">162</span>            .abortIf(18)<a name="line.162"></a>
+<span class="sourceLineNo">163</span>            .sync(() -&gt; TaskChainUtil.log("Shouldn't be called"))<a name="line.163"></a>
+<span class="sourceLineNo">164</span>            .execute((finished) -&gt; TaskChainUtil.log("final test chain finished: " + finished));<a name="line.164"></a>
+<span class="sourceLineNo">165</span><a name="line.165"></a>
+<span class="sourceLineNo">166</span><a name="line.166"></a>
+<span class="sourceLineNo">167</span>    }<a name="line.167"></a>
+<span class="sourceLineNo">168</span>}<a name="line.168"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+</div>
+</body>
+</html>
