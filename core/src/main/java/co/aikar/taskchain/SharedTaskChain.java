@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-class SharedTaskChain<R> extends TaskChain<R> {
+class SharedTaskChain<R> extends BaseTaskChain<R> {
     private final String name;
     private final Map<String, Queue<SharedTaskChain>> sharedChains;
     private Queue<SharedTaskChain> queue;

@@ -37,46 +37,19 @@ import co.aikar.taskchain.TaskChainTasks.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 
 /**
  * The Main API class of TaskChain. TaskChain's are created by a {@link TaskChainFactory}
  */
 @SuppressWarnings({"unused", "FieldAccessedSynchronizedAndUnsynchronized"})
-public class TaskChain <T> {
-    private static final ThreadLocal<TaskChain<?>> currentChain = new ThreadLocal<>();
-
-    private final GameInterface impl;
-    private final TaskChainFactory factory;
-    private final Map<String, Object> taskMap = new HashMap<>(0);
-    private final ConcurrentLinkedQueue<TaskHolder<?,?>> chainQueue = new ConcurrentLinkedQueue<>();
-
-    private int currentActionIndex = 0;
-    private int actionIndex = 0;
-    private boolean executed = false;
-    private boolean async = false;
-    private boolean done = false;
-
-    private Object previous;
-    private TaskHolder<?, ?> currentHolder;
-    private Consumer<Boolean> doneCallback;
-    private BiConsumer<Exception, Task<?, ?>> errorHandler;
-
-    /* ======================================================================================== */
-    TaskChain(TaskChainFactory factory) {
-        this.factory = factory;
-        this.impl = factory.getImplementation();
-    }
+public interface TaskChain <T> {
     /* ======================================================================================== */
     // <editor-fold desc="// API Methods - Getters & Setters">
     /**
@@ -86,34 +59,28 @@ public class TaskChain <T> {
      * Useful in error or done handlers to know where you are in the chain when it aborted or threw exception.
      * @return The current index
      */
-    public int getCurrentActionIndex() {
-        return currentActionIndex;
-    }
+    public int getCurrentActionIndex();
 
     /**
      * Changes the done callback handler for this chain
      * @param doneCallback The handler
      */
     @SuppressWarnings("WeakerAccess")
-    public void setDoneCallback(Consumer<Boolean> doneCallback) {
-        this.doneCallback = doneCallback;
-    }
+    public void setDoneCallback(Consumer<Boolean> doneCallback);
 
     /**
      * @return The current error handler or null
      */
-    public BiConsumer<Exception, Task<?, ?>> getErrorHandler() {
-        return errorHandler;
-    }
+    public BiConsumer<Exception, Task<?, ?>> getErrorHandler();
 
     /**
      * Changes the error handler for this chain
      * @param errorHandler The error handler
      */
     @SuppressWarnings("WeakerAccess")
-    public void setErrorHandler(BiConsumer<Exception, Task<?, ?>> errorHandler) {
-        this.errorHandler = errorHandler;
-    }
+    public void setErrorHandler(BiConsumer<Exception, Task<?, ?>> errorHandler);
+
+    BaseTaskChain<T> getImplChain();
     // </editor-fold>
     /* ======================================================================================== */
     // <editor-fold desc="// API Methods - Data Wrappers">
@@ -174,7 +141,7 @@ public class TaskChain <T> {
      */
     @SuppressWarnings("WeakerAccess")
     public static TaskChain<?> getCurrentChain() {
-        return currentChain.get();
+        return BaseTaskChain.currentChain.get();
     }
 
     /* ======================================================================================== */
@@ -184,9 +151,7 @@ public class TaskChain <T> {
      * @param key Key to check if Task Data has a value for
      */
     @SuppressWarnings("WeakerAccess")
-    public boolean hasTaskData(String key) {
-        return taskMap.containsKey(key);
-    }
+    public boolean hasTaskData(String key);
 
     /**
      * Retrieves a value relating to a specific key, saved by a previous task.
@@ -195,10 +160,7 @@ public class TaskChain <T> {
      * @param <R> Type the Task Data value is expected to be
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> R getTaskData(String key) {
-        //noinspection unchecked
-        return (R) taskMap.get(key);
-    }
+    public <R> R getTaskData(String key);
 
     /**
      * Saves a value for this chain so that a task furthur up the chain can access it.
@@ -210,10 +172,7 @@ public class TaskChain <T> {
      * @param <R> Type the Task Data value is expected to be
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> R setTaskData(String key, Object val) {
-        //noinspection unchecked
-        return (R) taskMap.put(key, val);
-    }
+    public <R> R setTaskData(String key, Object val);
 
     /**
      * Removes a saved value on the chain.
@@ -222,10 +181,7 @@ public class TaskChain <T> {
      * @param <R> Type the Task Data value is expected to be
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> R removeTaskData(String key) {
-        //noinspection unchecked
-        return (R) taskMap.remove(key);
-    }
+    public <R> R removeTaskData(String key);
 
     /**
      * Takes the previous tasks return value, stores it to the specified key
@@ -234,7 +190,7 @@ public class TaskChain <T> {
      * @param key Key to store the previous return value into Task Data
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<T> storeAsData(String key) {
+    public default TaskChain<T> storeAsData(String key) {
         return current((val) -> {
             setTaskData(key, val);
             return val;
@@ -250,7 +206,7 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> returnData(String key) {
+    public default <R> TaskChain<R> returnData(String key) {
         //noinspection unchecked
         return currentFirst(() -> (R) getTaskData(key));
     }
@@ -259,7 +215,7 @@ public class TaskChain <T> {
      * Returns the chain itself to the next task.
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<TaskChain<?>> returnChain() {
+    public default TaskChain<TaskChain<?>> returnChain() {
         return currentFirst(() -> this);
     }
 
@@ -275,10 +231,10 @@ public class TaskChain <T> {
      * @param gameUnits # of game units to delay before next task
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<T> delay(final int gameUnits) {
+    public default TaskChain<T> delay(final int gameUnits) {
         //noinspection CodeBlock2Expr
         return currentCallback((input, next) -> {
-            impl.scheduleTask(gameUnits, () -> next.accept(input));
+            getImplChain().getGameImpl().scheduleTask(gameUnits, () -> next.accept(input));
         });
     }
 
@@ -289,10 +245,10 @@ public class TaskChain <T> {
      * @param duration duration of the delay before next task
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<T> delay(final int duration, TimeUnit unit) {
+    public default TaskChain<T> delay(final int duration, TimeUnit unit) {
         //noinspection CodeBlock2Expr
         return currentCallback((input, next) -> {
-            impl.scheduleTask(duration, unit, () -> next.accept(input));
+            getImplChain().getGameImpl().scheduleTask(duration, unit, () -> next.accept(input));
         });
     }
 
@@ -304,7 +260,7 @@ public class TaskChain <T> {
      * If not null, the previous task return will forward to the next task.
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<T> abortIfNull() {
+    public default TaskChain<T> abortIfNull() {
         return abortIfNull(null, null, null, null);
     }
 
@@ -312,7 +268,7 @@ public class TaskChain <T> {
      * {@link TaskChain#abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<T> abortIfNull(TaskChainAbortAction<?, ?, ?> action) {
+    public default TaskChain<T> abortIfNull(TaskChainAbortAction<?, ?, ?> action) {
         return abortIf(null, action, null, null, null);
     }
 
@@ -320,7 +276,7 @@ public class TaskChain <T> {
      * {@link TaskChain#abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
-    public <A1> TaskChain<T> abortIfNull(TaskChainAbortAction<A1, ?, ?> action, A1 arg1) {
+    public default <A1> TaskChain<T> abortIfNull(TaskChainAbortAction<A1, ?, ?> action, A1 arg1) {
         //noinspection unchecked
         return abortIf(null, action, arg1, null, null);
     }
@@ -329,7 +285,7 @@ public class TaskChain <T> {
      * {@link TaskChain#abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
-    public <A1, A2> TaskChain<T> abortIfNull(TaskChainAbortAction<A1, A2, ?> action, A1 arg1, A2 arg2) {
+    public default <A1, A2> TaskChain<T> abortIfNull(TaskChainAbortAction<A1, A2, ?> action, A1 arg1, A2 arg2) {
         //noinspection unchecked
         return abortIf(null, action, arg1, arg2, null);
     }
@@ -341,7 +297,7 @@ public class TaskChain <T> {
      * If not null, the previous task return will forward to the next task.
      */
     @SuppressWarnings("WeakerAccess")
-    public <A1, A2, A3> TaskChain<T> abortIfNull(TaskChainAbortAction<A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
+    public default <A1, A2, A3> TaskChain<T> abortIfNull(TaskChainAbortAction<A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
         //noinspection unchecked
         return abortIf(null, action, arg1, arg2, arg3);
     }
@@ -352,7 +308,7 @@ public class TaskChain <T> {
      * If not, the previous task return will forward to the next task.
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<T> abortIf(T ifObj) {
+    public default TaskChain<T> abortIf(T ifObj) {
         return abortIf(ifObj, null, null, null, null);
     }
 
@@ -360,7 +316,7 @@ public class TaskChain <T> {
      * {@link TaskChain#abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<?, ?, ?> action) {
+    default TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<?, ?, ?> action) {
         return abortIf(ifObj, action, null, null, null);
     }
 
@@ -368,7 +324,7 @@ public class TaskChain <T> {
      * {@link TaskChain#abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
-    public <A1> TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<A1, ?, ?> action, A1 arg1) {
+    default <A1> TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<A1, ?, ?> action, A1 arg1) {
         return abortIf(ifObj, action, arg1, null, null);
     }
 
@@ -376,7 +332,7 @@ public class TaskChain <T> {
      * {@link TaskChain#abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
-    public <A1, A2> TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<A1, A2, ?> action, A1 arg1, A2 arg2) {
+    default <A1, A2> TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<A1, A2, ?> action, A1 arg1, A2 arg2) {
         return abortIf(ifObj, action, arg1, arg2, null);
     }
 
@@ -387,10 +343,10 @@ public class TaskChain <T> {
      * If not null, the previous task return will forward to the next task.
      */
     @SuppressWarnings("WeakerAccess")
-    public <A1, A2, A3> TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
+    default <A1, A2, A3> TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
         return current((obj) -> {
             if (Objects.equals(obj, ifObj)) {
-                handleAbortAction(action, arg1, arg2, arg3);
+                getImplChain().handleAbortAction(action, arg1, arg2, arg3);
                 return null;
             }
             return obj;
@@ -403,7 +359,7 @@ public class TaskChain <T> {
      * If it is, the previous task return will forward to the next task.
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<T> abortIfNot(T ifNotObj) {
+    default TaskChain<T> abortIfNot(T ifNotObj) {
         return abortIfNot(ifNotObj, null, null, null, null);
     }
 
@@ -411,7 +367,7 @@ public class TaskChain <T> {
      * {@link TaskChain#abortIfNot(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<?, ?, ?> action) {
+    default TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<?, ?, ?> action) {
         return abortIfNot(ifNotObj, action, null, null, null);
     }
 
@@ -419,7 +375,7 @@ public class TaskChain <T> {
      * {@link TaskChain#abortIfNot(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
-    public <A1> TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<A1, ?, ?> action, A1 arg1) {
+    default <A1> TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<A1, ?, ?> action, A1 arg1) {
         return abortIfNot(ifNotObj, action, arg1, null, null);
     }
 
@@ -427,7 +383,7 @@ public class TaskChain <T> {
      * {@link TaskChain#abortIfNot(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
-    public <A1, A2> TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<A1, A2, ?> action, A1 arg1, A2 arg2) {
+    default <A1, A2> TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<A1, A2, ?> action, A1 arg1, A2 arg2) {
         return abortIfNot(ifNotObj, action, arg1, arg2, null);
     }
 
@@ -438,10 +394,10 @@ public class TaskChain <T> {
      * If not null, the previous task return will forward to the next task.
      */
     @SuppressWarnings("WeakerAccess")
-    public <A1, A2, A3> TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
+    default <A1, A2, A3> TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
         return current((obj) -> {
             if (!Objects.equals(obj, ifNotObj)) {
-                handleAbortAction(action, arg1, arg2, arg3);
+                getImplChain().handleAbortAction(action, arg1, arg2, arg3);
                 return null;
             }
             return obj;
@@ -470,9 +426,10 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> syncFirstCallback(AsyncExecutingFirstTask<R> task) {
+    default <R> TaskChain<R> syncFirstCallback(AsyncExecutingFirstTask<R> task) {
         //noinspection unchecked
-        return add0(new TaskHolder<>(this, false, task));
+        
+        return getImplChain().add0(false, task);
     }
 
     /**
@@ -481,9 +438,9 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> asyncFirstCallback(AsyncExecutingFirstTask<R> task) {
+    default <R> TaskChain<R> asyncFirstCallback(AsyncExecutingFirstTask<R> task) {
         //noinspection unchecked
-        return add0(new TaskHolder<>(this, true, task));
+        return getImplChain().add0(true, task);
     }
 
     /**
@@ -492,9 +449,9 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> currentFirstCallback(AsyncExecutingFirstTask<R> task) {
+    default <R> TaskChain<R> currentFirstCallback(AsyncExecutingFirstTask<R> task) {
         //noinspection unchecked
-        return add0(new TaskHolder<>(this, null, task));
+        return getImplChain().add0(null, task);
     }
 
     /**
@@ -513,9 +470,9 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> syncCallback(AsyncExecutingTask<R, T> task) {
+    default <R> TaskChain<R> syncCallback(AsyncExecutingTask<R, T> task) {
         //noinspection unchecked
-        return add0(new TaskHolder<>(this, false, task));
+        return getImplChain().add0(false, task);
     }
 
     /**
@@ -523,8 +480,8 @@ public class TaskChain <T> {
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<?> syncCallback(AsyncExecutingGenericTask task) {
-        return add0(new TaskHolder<>(this, false, task));
+    default TaskChain<?> syncCallback(AsyncExecutingGenericTask task) {
+        return getImplChain().add0(false, task);
     }
 
     /**
@@ -533,9 +490,9 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> asyncCallback(AsyncExecutingTask<R, T> task) {
+    default <R> TaskChain<R> asyncCallback(AsyncExecutingTask<R, T> task) {
         //noinspection unchecked
-        return add0(new TaskHolder<>(this, true, task));
+        return getImplChain().add0(true, task);
     }
 
     /**
@@ -543,8 +500,8 @@ public class TaskChain <T> {
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<?> asyncCallback(AsyncExecutingGenericTask task) {
-        return add0(new TaskHolder<>(this, true, task));
+    default TaskChain<?> asyncCallback(AsyncExecutingGenericTask task) {
+        return getImplChain().add0(true, task);
     }
 
     /**
@@ -553,9 +510,9 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> currentCallback(AsyncExecutingTask<R, T> task) {
+    default <R> TaskChain<R> currentCallback(AsyncExecutingTask<R, T> task) {
         //noinspection unchecked
-        return add0(new TaskHolder<>(this, null, task));
+        return getImplChain().add0(null, task);
     }
 
     /**
@@ -563,8 +520,8 @@ public class TaskChain <T> {
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<?> currentCallback(AsyncExecutingGenericTask task) {
-        return add0(new TaskHolder<>(this, null, task));
+    default TaskChain<?> currentCallback(AsyncExecutingGenericTask task) {
+        return getImplChain().add0(null, task);
     }
 
     // </editor-fold>
@@ -581,7 +538,7 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> future(CompletableFuture<R> future) {
+    default <R> TaskChain<R> future(CompletableFuture<R> future) {
         return currentFuture((input) -> future);
     }
 
@@ -592,13 +549,13 @@ public class TaskChain <T> {
      * @param futures The Futures to wait until it is complete on
      * @param <R> Return type that the next parameter can expect as argument type
      */
-    @SafeVarargs
-    @SuppressWarnings("WeakerAccess")
-    public final <R> TaskChain<List<R>> futures(CompletableFuture<R>... futures) {
+    @SuppressWarnings({"WeakerAccess", "unchecked"})
+    default <R> TaskChain<List<R>> futures(CompletableFuture<R>... futures) {
         List<CompletableFuture<R>> futureList = new ArrayList<>(futures.length);
         Collections.addAll(futureList, futures);
         return futures(futureList);
     }
+
 
     /**
      * Takes multiple supplied Futures, and holds processing of the chain until the futures completes.
@@ -608,8 +565,8 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<List<R>> futures(List<CompletableFuture<R>> futures) {
-        return currentFuture((input) -> getFuture(futures));
+    default <R> TaskChain<List<R>> futures(List<CompletableFuture<R>> futures) {
+        return currentFuture((input) -> getImplChain().getFuture(futures));
     }
 
     /**
@@ -623,8 +580,8 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<List<R>> syncFutures(Task<List<CompletableFuture<R>>, T> task) {
-        return syncFuture((input) -> getFuture(task.run(input)));
+    default <R> TaskChain<List<R>> syncFutures(Task<List<CompletableFuture<R>>, T> task) {
+        return syncFuture((input) -> getImplChain().getFuture(task.run(input)));
     }
 
     /**
@@ -638,8 +595,8 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<List<R>> asyncFutures(Task<List<CompletableFuture<R>>, T> task) {
-        return asyncFuture((input) -> getFuture(task.run(input)));
+    default <R> TaskChain<List<R>> asyncFutures(Task<List<CompletableFuture<R>>, T> task) {
+        return asyncFuture((input) -> getImplChain().getFuture(task.run(input)));
     }
 
     /**
@@ -653,8 +610,8 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<List<R>> currentFutures(Task<List<CompletableFuture<R>>, T> task) {
-        return currentFuture((input) -> getFuture(task.run(input)));
+    default <R> TaskChain<List<R>> currentFutures(Task<List<CompletableFuture<R>>, T> task) {
+        return currentFuture((input) -> getImplChain().getFuture(task.run(input)));
     }
 
     /**
@@ -668,8 +625,8 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<List<R>> syncFirstFutures(FirstTask<List<CompletableFuture<R>>> task) {
-        return syncFuture((input) -> getFuture(task.run()));
+    default <R> TaskChain<List<R>> syncFirstFutures(FirstTask<List<CompletableFuture<R>>> task) {
+        return syncFuture((input) -> getImplChain().getFuture(task.run()));
     }
 
     /**
@@ -683,8 +640,8 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<List<R>> asyncFirstFutures(FirstTask<List<CompletableFuture<R>>> task) {
-        return asyncFuture((input) -> getFuture(task.run()));
+    default <R> TaskChain<List<R>> asyncFirstFutures(FirstTask<List<CompletableFuture<R>>> task) {
+        return asyncFuture((input) -> getImplChain().getFuture(task.run()));
     }
 
     /**
@@ -698,8 +655,8 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<List<R>> currentFirstFutures(FirstTask<List<CompletableFuture<R>>> task) {
-        return currentFuture((input) -> getFuture(task.run()));
+    default <R> TaskChain<List<R>> currentFirstFutures(FirstTask<List<CompletableFuture<R>>> task) {
+        return currentFuture((input) -> getImplChain().getFuture(task.run()));
     }
 
     /**
@@ -713,9 +670,9 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> syncFirstFuture(FutureFirstTask<R> task) {
+    default <R> TaskChain<R> syncFirstFuture(FutureFirstTask<R> task) {
         //noinspection unchecked
-        return add0(new TaskHolder<>(this, false, task));
+        return getImplChain().add0(false, task);
     }
 
     /**
@@ -724,9 +681,9 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> asyncFirstFuture(FutureFirstTask<R> task) {
+    default <R> TaskChain<R> asyncFirstFuture(FutureFirstTask<R> task) {
         //noinspection unchecked
-        return add0(new TaskHolder<>(this, true, task));
+        return getImplChain().add0(true, task);
     }
 
     /**
@@ -735,9 +692,9 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> currentFirstFuture(FutureFirstTask<R> task) {
+    default <R> TaskChain<R> currentFirstFuture(FutureFirstTask<R> task) {
         //noinspection unchecked
-        return add0(new TaskHolder<>(this, null, task));
+        return getImplChain().add0(null, task);
     }
 
     /**
@@ -751,9 +708,9 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> syncFuture(FutureTask<R, T> task) {
+    default <R> TaskChain<R> syncFuture(FutureTask<R, T> task) {
         //noinspection unchecked
-        return add0(new TaskHolder<>(this, false, task));
+        return getImplChain().add0(false, task);
     }
 
     /**
@@ -761,8 +718,8 @@ public class TaskChain <T> {
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<?> syncFuture(FutureGenericTask task) {
-        return add0(new TaskHolder<>(this, false, task));
+    default TaskChain<?> syncFuture(FutureGenericTask task) {
+        return getImplChain().add0(false, task);
     }
 
     /**
@@ -771,9 +728,9 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> asyncFuture(FutureTask<R, T> task) {
+    default <R> TaskChain<R> asyncFuture(FutureTask<R, T> task) {
         //noinspection unchecked
-        return add0(new TaskHolder<>(this, true, task));
+        return getImplChain().add0(true, task);
     }
 
     /**
@@ -781,8 +738,8 @@ public class TaskChain <T> {
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<?> asyncFuture(FutureGenericTask task) {
-        return add0(new TaskHolder<>(this, true, task));
+    default TaskChain<?> asyncFuture(FutureGenericTask task) {
+        return getImplChain().add0(true, task);
     }
 
     /**
@@ -791,9 +748,9 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> currentFuture(FutureTask<R, T> task) {
+    default <R> TaskChain<R> currentFuture(FutureTask<R, T> task) {
         //noinspection unchecked
-        return add0(new TaskHolder<>(this, null, task));
+        return getImplChain().add0(null, task);
     }
 
     /**
@@ -801,8 +758,8 @@ public class TaskChain <T> {
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<?> currentFuture(FutureGenericTask task) {
-        return add0(new TaskHolder<>(this, null, task));
+    default TaskChain<?> currentFuture(FutureGenericTask task) {
+        return getImplChain().add0(null, task);
     }
 
     // </editor-fold>
@@ -817,9 +774,9 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> syncFirst(FirstTask<R> task) {
+    default <R> TaskChain<R> syncFirst(FirstTask<R> task) {
         //noinspection unchecked
-        return add0(new TaskHolder<>(this, false, task));
+        return getImplChain().add0(false, task);
     }
 
     /**
@@ -828,9 +785,9 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> asyncFirst(FirstTask<R> task) {
+    default <R> TaskChain<R> asyncFirst(FirstTask<R> task) {
         //noinspection unchecked
-        return add0(new TaskHolder<>(this, true, task));
+        return getImplChain().add0(true, task);
     }
 
     /**
@@ -839,9 +796,9 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> currentFirst(FirstTask<R> task) {
+    default <R> TaskChain<R> currentFirst(FirstTask<R> task) {
         //noinspection unchecked
-        return add0(new TaskHolder<>(this, null, task));
+        return getImplChain().add0(null, task);
     }
 
     /**
@@ -850,9 +807,9 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> sync(Task<R, T> task) {
+    default <R> TaskChain<R> sync(Task<R, T> task) {
         //noinspection unchecked
-        return add0(new TaskHolder<>(this, false, task));
+        return getImplChain().add0(false, task);
     }
 
     /**
@@ -860,8 +817,8 @@ public class TaskChain <T> {
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<?> sync(GenericTask task) {
-        return add0(new TaskHolder<>(this, false, task));
+    default TaskChain<?> sync(GenericTask task) {
+        return getImplChain().add0(false, task);
     }
 
     /**
@@ -870,9 +827,9 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> async(Task<R, T> task) {
+    default <R> TaskChain<R> async(Task<R, T> task) {
         //noinspection unchecked
-        return add0(new TaskHolder<>(this, true, task));
+        return getImplChain().add0(true, task);
     }
 
     /**
@@ -880,8 +837,8 @@ public class TaskChain <T> {
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<?> async(GenericTask task) {
-        return add0(new TaskHolder<>(this, true, task));
+    default TaskChain<?> async(GenericTask task) {
+        return getImplChain().add0(true, task);
     }
 
     /**
@@ -890,9 +847,9 @@ public class TaskChain <T> {
      * @param <R> Return type that the next parameter can expect as argument type
      */
     @SuppressWarnings("WeakerAccess")
-    public <R> TaskChain<R> current(Task<R, T> task) {
+    default <R> TaskChain<R> current(Task<R, T> task) {
         //noinspection unchecked
-        return add0(new TaskHolder<>(this, null, task));
+        return getImplChain().add0(null, task);
     }
 
     /**
@@ -900,8 +857,8 @@ public class TaskChain <T> {
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<?> current(GenericTask task) {
-        return add0(new TaskHolder<>(this, null, task));
+    default TaskChain<?> current(GenericTask task) {
+        return getImplChain().add0(null, task);
     }
 
 
@@ -910,8 +867,8 @@ public class TaskChain <T> {
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<?> syncLast(LastTask<T> task) {
-        return add0(new TaskHolder<>(this, false, task));
+    default TaskChain<?> syncLast(LastTask<T> task) {
+        return getImplChain().add0(false, task);
     }
 
     /**
@@ -919,8 +876,8 @@ public class TaskChain <T> {
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<?> asyncLast(LastTask<T> task) {
-        return add0(new TaskHolder<>(this, true, task));
+    default TaskChain<?> asyncLast(LastTask<T> task) {
+        return getImplChain().add0(true, task);
     }
 
     /**
@@ -928,15 +885,15 @@ public class TaskChain <T> {
      * @param task The task to execute
      */
     @SuppressWarnings("WeakerAccess")
-    public TaskChain<?> currentLast(LastTask<T> task) {
-        return add0(new TaskHolder<>(this, null, task));
+    default TaskChain<?> currentLast(LastTask<T> task) {
+        return getImplChain().add0(null, task);
     }
 
     /**
      * Finished adding tasks, begins executing them.
      */
     @SuppressWarnings("WeakerAccess")
-    public void execute() {
+    public default void execute() {
         execute((Consumer<Boolean>) null, null);
     }
 
@@ -945,7 +902,7 @@ public class TaskChain <T> {
      * @param done The Callback to handle when the chain has finished completion. Argument to consumer contains finish state
      */
     @SuppressWarnings("WeakerAccess")
-    public void execute(Runnable done) {
+    public default void execute(Runnable done) {
         execute((finished) -> done.run(), null);
     }
 
@@ -955,7 +912,7 @@ public class TaskChain <T> {
      * @param errorHandler The Error handler to handle exceptions
      */
     @SuppressWarnings("WeakerAccess")
-    public void execute(Runnable done, BiConsumer<Exception, Task<?, ?>> errorHandler) {
+    public default void execute(Runnable done, BiConsumer<Exception, Task<?, ?>> errorHandler) {
         execute((finished) -> done.run(), errorHandler);
     }
 
@@ -964,7 +921,7 @@ public class TaskChain <T> {
      * @param done The Callback to handle when the chain has finished completion. Argument to consumer contains finish state
      */
     @SuppressWarnings("WeakerAccess")
-    public void execute(Consumer<Boolean> done) {
+    public default void execute(Consumer<Boolean> done) {
         execute(done, null);
     }
 
@@ -972,7 +929,7 @@ public class TaskChain <T> {
      * Finished adding tasks, begins executing them, with an error handler
      * @param errorHandler The Error handler to handle exceptions
      */
-    public void execute(BiConsumer<Exception, Task<?, ?>> errorHandler) {
+    public default void execute(BiConsumer<Exception, Task<?, ?>> errorHandler) {
         execute((Consumer<Boolean>) null, errorHandler);
     }
 
@@ -981,272 +938,7 @@ public class TaskChain <T> {
      * @param done The Callback to handle when the chain has finished completion. Argument to consumer contains finish state
      * @param errorHandler The Error handler to handle exceptions
      */
-    public void execute(Consumer<Boolean> done, BiConsumer<Exception, Task<?, ?>> errorHandler) {
-        if (errorHandler == null) {
-            errorHandler = factory.getDefaultErrorHandler();
-        }
-        this.doneCallback = done;
-        this.errorHandler = errorHandler;
-        execute0();
-    }
+    public void execute(Consumer<Boolean> done, BiConsumer<Exception, Task<?, ?>> errorHandler);
 
-    // </editor-fold>
-    /* ======================================================================================== */
-    // <editor-fold desc="// Implementation Details">
-    private <A1, A2, A3> void handleAbortAction(TaskChainAbortAction<A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
-        if (action != null) {
-            final TaskChain<?> prev = currentChain.get();
-            try {
-                currentChain.set(this);
-                action.onAbort(this, arg1, arg2, arg3);
-            } catch (Exception e) {
-                TaskChainUtil.logError("TaskChain Exception in Abort Action handler: " + action.getClass().getName());
-                TaskChainUtil.logError("Current Action Index was: " + currentActionIndex);
-                e.printStackTrace();
-            } finally {
-                currentChain.set(prev);
-            }
-        }
-        abort();
-    }
-
-    void execute0() {
-        synchronized (this) {
-            if (this.executed) {
-                throw new RuntimeException("Already executed");
-            }
-            this.executed = true;
-        }
-        async = !impl.isMainThread();
-        nextTask();
-    }
-
-    void done(boolean finished) {
-        this.done = true;
-        if (this.doneCallback != null) {
-            final TaskChain<?> prev = currentChain.get();
-            try {
-                currentChain.set(this);
-                this.doneCallback.accept(finished);
-            } catch (Exception e) {
-                this.handleError(e, null);
-            } finally {
-                currentChain.set(prev);
-            }
-        }
-    }
-
-    @SuppressWarnings({"rawtypes", "WeakerAccess"})
-    protected TaskChain add0(TaskHolder<?,?> task) {
-        synchronized (this) {
-            if (this.executed) {
-                throw new RuntimeException("TaskChain is executing");
-            }
-        }
-
-        this.chainQueue.add(task);
-        return this;
-    }
-
-    /**
-     * Fires off the next task, and switches between Async/Sync as necessary.
-     */
-    private void nextTask() {
-        synchronized (this) {
-            this.currentHolder = this.chainQueue.poll();
-            if (this.currentHolder == null) {
-                this.done = true; // to ensure its done while synchronized
-            }
-        }
-
-        if (this.currentHolder == null) {
-            this.previous = null;
-            // All Done!
-            this.done(true);
-            return;
-        }
-
-        Boolean isNextAsync = this.currentHolder.async;
-        if (isNextAsync == null || factory.shutdown) {
-            this.currentHolder.run();
-        } else if (isNextAsync) {
-            if (this.async) {
-                this.currentHolder.run();
-            } else {
-                impl.postAsync(() -> {
-                    this.async = true;
-                    this.currentHolder.run();
-                });
-            }
-        } else {
-            if (this.async) {
-                impl.postToMain(() -> {
-                    this.async = false;
-                    this.currentHolder.run();
-                });
-            } else {
-                this.currentHolder.run();
-            }
-        }
-    }
-
-    private void handleError(Throwable throwable, Task<?, ?> task) {
-        Exception e = throwable instanceof Exception ? (Exception) throwable : new Exception(throwable);
-        if (errorHandler != null) {
-            final TaskChain<?> prev = currentChain.get();
-            try {
-                currentChain.set(this);
-                errorHandler.accept(e, task);
-            } catch (Exception e2) {
-                TaskChainUtil.logError("TaskChain Exception in the error handler!" + e2.getMessage());
-                TaskChainUtil.logError("Current Action Index was: " + currentActionIndex);
-                e.printStackTrace();
-            } finally {
-                currentChain.set(prev);
-            }
-        } else {
-            TaskChainUtil.logError("TaskChain Exception on " + (task != null ? task.getClass().getName() : "Done Hander") + ": " + e.getMessage());
-            TaskChainUtil.logError("Current Action Index was: " + currentActionIndex);
-            e.printStackTrace();
-        }
-    }
-
-    private void abortChain() {
-        this.previous = null;
-        this.chainQueue.clear();
-        this.done(false);
-    }
-
-    private <R> CompletableFuture<List<R>> getFuture(List<CompletableFuture<R>> futures) {
-        CompletableFuture<List<R>> onDone = new CompletableFuture<>();
-        CompletableFuture<?>[] futureArray = new CompletableFuture<?>[futures.size()];
-        CompletableFuture.allOf((CompletableFuture<?>[]) futures.toArray(futureArray)).whenComplete((aVoid, throwable) -> {
-            if (throwable != null) {
-                onDone.completeExceptionally(throwable);
-            } else {
-                boolean[] error = {false};
-                final List<R> results = futures.stream().map(f -> {
-                    try {
-                        return f.join();
-                    } catch (Exception e) {
-                        error[0] = true;
-                        TaskChain.this.handleError(e, TaskChain.this.currentHolder.task);
-                        return null;
-                    }
-                }).collect(Collectors.toList());
-                if (error[0]) {
-                    onDone.completeExceptionally(new Exception("Future Dependant had an exception"));
-                } else {
-                    onDone.complete(results);
-                }
-            }
-        });
-        return onDone;
-    }
-
-    // </editor-fold>
-    /* ======================================================================================== */
-    // <editor-fold desc="// TaskHolder">
-    /**
-     * Provides foundation of a task with what the previous task type should return
-     * to pass to this and what this task will return.
-     * @param <R> Return Type
-     * @param <A> Argument Type Expected
-     */
-    @SuppressWarnings("AccessingNonPublicFieldOfAnotherObject")
-    private class TaskHolder<R, A> {
-        private final TaskChain<?> chain;
-        private final Task<R, A> task;
-        final Boolean async;
-
-        private boolean executed = false;
-        private boolean aborted = false;
-        private final int actionIndex;
-
-        private TaskHolder(TaskChain<?> chain, Boolean async, Task<R, A> task) {
-            this.actionIndex = TaskChain.this.actionIndex++;
-            this.task = task;
-            this.chain = chain;
-            this.async = async;
-        }
-
-        /**
-         * Called internally by Task Chain to facilitate executing the task and then the next task.
-         */
-        private void run() {
-            final Object arg = this.chain.previous;
-            this.chain.previous = null;
-            TaskChain.this.currentActionIndex = this.actionIndex;
-            final R res;
-            final TaskChain<?> prevChain = currentChain.get();
-            try {
-                currentChain.set(this.chain);
-                if (this.task instanceof FutureTask) {
-                    //noinspection unchecked
-                    final CompletableFuture<R> future = ((FutureTask<R, A>) this.task).runFuture((A) arg);
-                    if (future == null) {
-                        throw new NullPointerException("Must return a Future");
-                    }
-                    future.whenComplete((r, throwable) -> {
-                        if (throwable != null) {
-                            this.chain.handleError(throwable, this.task);
-                            this.abort();
-                        } else {
-                            this.next(r);
-                        }
-                    });
-                } else if (this.task instanceof AsyncExecutingTask) {
-                    //noinspection unchecked
-                    ((AsyncExecutingTask<R, A>) this.task).runAsync((A) arg, this::next);
-                } else {
-                    //noinspection unchecked
-                    next(this.task.run((A) arg));
-                }
-            } catch (Throwable e) {
-                //noinspection ConstantConditions
-                if (e instanceof AbortChainException) {
-                    this.abort();
-                    return;
-                }
-                this.chain.handleError(e, this.task);
-                this.abort();
-            } finally {
-                if (prevChain != null) {
-                    currentChain.set(prevChain);
-                } else {
-                    currentChain.remove();
-                }
-            }
-        }
-
-        /**
-         * Abort the chain, and clear tasks for GC.
-         */
-        private synchronized void abort() {
-            this.aborted = true;
-            this.chain.abortChain();
-        }
-
-        /**
-         * Accepts result of previous task and executes the next
-         */
-        private void next(Object resp) {
-            synchronized (this) {
-                if (this.aborted) {
-                    this.chain.done(false);
-                    return;
-                }
-                if (this.executed) {
-                    this.chain.done(false);
-                    throw new RuntimeException("This task has already been executed.");
-                }
-                this.executed = true;
-            }
-
-            this.chain.async = !TaskChain.this.impl.isMainThread(); // We don't know where the task called this from.
-            this.chain.previous = resp;
-            this.chain.nextTask();
-        }
-    }
     // </editor-fold>
 }

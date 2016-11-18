@@ -56,7 +56,7 @@ public class TaskChainFactory {
      * Creates a new chain.
      */
     public <T> TaskChain<T> newChain() {
-        return new TaskChain<>(this);
+        return new BaseTaskChain<>(this);
     }
 
     /**
