@@ -19,7 +19,7 @@ TaskChain then executes your task pipe line, switching thread context where need
   - Bukkit based Minecraft Servers (Bukkit/Spigot/Paper)
     - [[GUIDE: Using in your Bukkit Plugins](https://github.com/aikar/TaskChain/wiki/implementing-bukkit)]
   - Sponge Minecraft Servers
-    - [[GUIDE: Using in your Sponge Plugins](https://github.com/aikar/TaskChain/wiki/implementing-bukkit)]
+    - [[GUIDE: Using in your Sponge Plugins](https://github.com/aikar/TaskChain/wiki/implementing-sponge)]
 
 ### Planned
   - Forge Minecraft Servers [[#2](https://github.com/aikar/TaskChain/issues/2)]
