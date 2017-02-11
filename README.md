@@ -15,16 +15,18 @@ TaskChain then executes your task pipe line, switching thread context where need
 4. [Shared Task Chains](https://github.com/aikar/TaskChain/wiki/Shared-Task-Chains)
 
 ## Supported Game Platforms
-### Currently Supported
+### Currently Supported 
   - Bukkit based Minecraft Servers (Bukkit/Spigot/Paper)  
-  [[GUIDE: Using in your Plugins](https://github.com/aikar/TaskChain/wiki/implementing-bukkit)]
-  
-
-### In Progress:
-  - Sponge Minecraft Servers [[#1](https://github.com/aikar/TaskChain/issues/1)]
+  [[GUIDE: Using in your Bukkit Plugins](https://github.com/aikar/TaskChain/wiki/implementing-bukkit)]
+  - Sponge Minecraft Servers
+  [[GUIDE: Using in your Sponge Plugins](https://github.com/aikar/TaskChain/wiki/implementing-bukkit)]
 
 ### Planned
   - Forge Minecraft Servers [[#2](https://github.com/aikar/TaskChain/issues/2)]
+
+### 3rd Party
+  - Nukkit Minecraft Servers [[#13](https://github.com/aikar/TaskChain/issues/13)]
+
 
 ### Want to add your own game?
 If you wish to add support for your own game, see [Implementing a new game](https://github.com/aikar/TaskChain/wiki/implementing-a-new-game)
@@ -44,6 +46,16 @@ Dinosaurs have been dead for a long time, so get off it before you start to smel
 
 [Download Java 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 
+## Using Kotlin 1.1?
+If you are a Kotlin user, we actually do not recommend using TaskChain. [@okkero](https://github.com/okkero/) has
+created a vastly better experience using Coroutines in Kotlin.
+
+We recommend using his framework, [Skedule](https://github.com/okkero/Skedule/), which requires Kotlin 1.1.
+
+Coroutines are a beautiful way to create this kind of behavior, but sadly we are not able to do that kind of stuff in Java Syntax.
+
+  - Go to [Skedule](https://github.com/okkero/Skedule/)
+
 ## Older Versions
  * [v2](https://gist.github.com/aikar/77f8caee3c153074c99b): Updated to a Java 8 Lambda API. Massive redesign and new features. Very close to v3 but uses a static registration and global state, so it can only be bound to a single Bukkit Plugin    
  (note: some bugs were fixed in v3 with Shared chains done and error handlers)
@@ -52,6 +64,6 @@ Dinosaurs have been dead for a long time, so get off it before you start to smel
 
 
 ## License
-TaskChain (c) Daniel Ennis (Aikar) 2016.
+TaskChain (c) Daniel Ennis (Aikar) 2014-2017.
 
 TaskChain is licensed [MIT](https://tldrlegal.com/license/mit-license). See [LICENSE](LICENSE)
