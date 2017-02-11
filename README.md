@@ -46,13 +46,15 @@ Dinosaurs have been dead for a long time, so get off it before you start to smel
 
 [Download Java 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 
-## Using Kotlin 1.1?
-If you are a Kotlin user, we actually do not recommend using TaskChain. [@okkero](https://github.com/okkero/) has
+## Using Kotlin 1.1 for Bukkit Plugins?
+If you are a developing Bukkit plugins in Kotlin, we actually do not recommend using TaskChain. [@okkero](https://github.com/okkero/) has
 created a vastly better experience using Coroutines in Kotlin.
 
 We recommend using his framework, [Skedule](https://github.com/okkero/Skedule/), which requires Kotlin 1.1.
 
 Coroutines are a beautiful way to create this kind of behavior, but sadly we are not able to do that kind of stuff in Java Syntax.
+
+Note that Skedule is only for Bukkit plugins. If you are working in a different platform, TaskChain does still work for Kotlin. 
 
   - Go to [Skedule](https://github.com/okkero/Skedule/)
 
