@@ -1,4 +1,7 @@
 # TaskChain Changelog
+## Version 3.5.0
+* Added .configure(TaskChain<>) API so you can dynamically insert into chain without breaking fluent interface.
+
 ## Version 3.4.3
 * Added Java Sources and Java Docs
 * Removed the shading of core into -bukkit and -sponge. It will be shaded on user level anyways (so that it can pick up the javadocs)
