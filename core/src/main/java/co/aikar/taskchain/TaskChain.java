@@ -314,6 +314,18 @@ public class TaskChain <T> {
 
     // </editor-fold>
     // <editor-fold desc="// API Methods - Abort">
+
+    /**
+     * Aborts the chain once this step is reached. This is primarily useful when you are
+     * dynamically building the chains steps (such as .configure()) and want to conditionally stop the
+     * chain from proceeding.
+     *
+     * @return Chain
+     */
+    public TaskChain<?> abortChain() {
+        return current(TaskChain::abort);
+    }
+
     /**
      * Checks if the previous task return was null.
      *
@@ -1127,7 +1139,7 @@ public class TaskChain <T> {
         }
     }
 
-    private void abortChain() {
+    private void abortExecutingChain() {
         this.previous = null;
         this.chainQueue.clear();
         this.done(false);
@@ -1240,7 +1252,7 @@ public class TaskChain <T> {
          */
         private synchronized void abort() {
             this.aborted = true;
-            this.chain.abortChain();
+            this.chain.abortExecutingChain();
         }
 
         /**
