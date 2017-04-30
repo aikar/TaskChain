@@ -180,6 +180,22 @@ public class TaskChain <T> {
     /* ======================================================================================== */
 
     /**
+     * Allows you to call a callback to insert tasks into the chain without having to break the fluent interface
+     *
+     * Example: Plugin.newChain().sync(some::task).configure(chain -> {
+     *     chain.async(some::foo);
+     *     chain.sync(other::bar);
+     * }).async(other::task).execute();
+     *
+     * @param configure Instance of the current chain.
+     * @return The same chain
+     */
+    public TaskChain<T> configure(Consumer<TaskChain<T>> configure) {
+        configure.accept(this);
+        return this;
+    }
+
+    /**
      * Checks if the chain has a value saved for the specified key.
      * @param key Key to check if Task Data has a value for
      */

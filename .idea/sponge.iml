@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module com.demonwav.mcdev.MinecraftModuleTypes="SPONGE_MODULE_TYPE" org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+<module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="minecraft" name="Minecraft">
+      <configuration>
+        <autoDetectTypes>
+          <platformType>SPONGE</platformType>
+        </autoDetectTypes>
+      </configuration>
+    </facet>
+  </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
     <output url="file://$MODULE_DIR$/sponge/target/classes" />
     <output-test url="file://$MODULE_DIR$/sponge/target/test-classes" />
@@ -11,7 +20,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="core" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.spongepowered:spongeapi:6.0.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.slf4j:slf4j-api:1.7.21" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: org.slf4j:slf4j-api:1.7.22" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.guava:guava:17.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.google.code.gson:gson:2.2.4" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.apache.commons:commons-lang3:3.3.2" level="project" />
@@ -31,6 +40,5 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.flowpowered:flow-math:1.0.3" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.flowpowered:flow-noise:1.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.ow2.asm:asm:5.0.3" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.spongepowered:event-gen-core:2.1.0-SNAPSHOT" level="project" />
   </component>
 </module>
