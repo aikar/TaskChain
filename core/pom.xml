@@ -47,6 +47,7 @@
                     <quiet>true</quiet>
                     <notimestamp>true</notimestamp>
                     <linksource>true</linksource>
+                    <additionalparam>-Xdoclint:none</additionalparam>
                 </configuration>
                 <executions>
                     <execution>
