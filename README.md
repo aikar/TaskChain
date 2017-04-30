@@ -1,4 +1,4 @@
-# TaskChain - Current Release Version: <!--VERSION-->3.5.0<!--VERSION-->
+# TaskChain - Current Release Version: <!--VERSION-->3.6.0<!--VERSION-->
 ## What is TaskChain?
 TaskChain is a Java Control Flow framework designed for Game Developers. 
 

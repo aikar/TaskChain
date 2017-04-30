@@ -1,4 +1,8 @@
 # TaskChain Changelog
+
+## Version 3.6.0
+* Added .abortChain() API so you can insert an abort point for dynamic chain creation.
+
 ## Version 3.5.0
 * Added .configure(TaskChain<>) API so you can dynamically insert into chain without breaking fluent interface.
 
