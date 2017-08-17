@@ -26,6 +26,7 @@ package co.aikar.taskchain;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
@@ -34,6 +35,7 @@ public class TaskChainFactory {
     private final GameInterface impl;
     private final AsyncQueue asyncQueue;
     private final Map<String, Queue<SharedTaskChain>> sharedChains = new HashMap<>();
+    final Queue<TaskChain.TaskHolder> unfinishedTasks = new ConcurrentLinkedQueue<>();
     volatile private BiConsumer<Exception, TaskChainTasks.Task<?, ?>> defaultErrorHandler;
     volatile boolean shutdown = false;
 
@@ -101,7 +103,13 @@ public class TaskChainFactory {
      * @param units The units for how long to wait before giving up the shutdown
      */
     public void shutdown(int duration, TimeUnit units) {
-        shutdown = true;
+        synchronized (this) {
+            shutdown = true;
+        }
         asyncQueue.shutdown(duration, units);
+        // Anything that was finishing as part of the shutdown
+        for (TaskChain.TaskHolder task : this.unfinishedTasks) {
+            task.run(); // This will execute the entire chain to completion
+        }
     }
 }

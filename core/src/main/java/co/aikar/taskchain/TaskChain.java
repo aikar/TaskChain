@@ -180,6 +180,19 @@ public class TaskChain <T> {
     /* ======================================================================================== */
 
     /**
+     * Return's if the current factory is in a shutdown process.
+     * You should check this value if you are about to schedule a long delay, and potentially
+     * abort the chain or skip the delay if the factory is being shut down.
+     *
+     * @return If the factory is being shut down.
+     */
+    public boolean isShuttingDown() {
+        synchronized (this.factory) {
+            return this.factory.shutdown;
+        }
+    }
+
+    /**
      * Allows you to call a callback to insert tasks into the chain without having to break the fluent interface
      *
      * Example: Plugin.newChain().sync(some::task).configure(chain -> {
@@ -1095,7 +1108,16 @@ public class TaskChain <T> {
         }
 
         Boolean isNextAsync = this.currentHolder.async;
-        if (isNextAsync == null || factory.shutdown) {
+        if (isShuttingDown()) {
+            if (this.async) {
+                this.async = false;
+                // Hand it off to the shutdown task to pick up and resume sync
+                factory.unfinishedTasks.add(this.currentHolder);
+            } else {
+                // We must be currently in the shutdown task, execute!
+                this.currentHolder.run();
+            }
+        } else if (isNextAsync == null) {
             this.currentHolder.run();
         } else if (isNextAsync) {
             if (this.async) {
@@ -1182,7 +1204,7 @@ public class TaskChain <T> {
      * @param <A> Argument Type Expected
      */
     @SuppressWarnings("AccessingNonPublicFieldOfAnotherObject")
-    private class TaskHolder<R, A> {
+    class TaskHolder<R, A> {
         private final TaskChain<?> chain;
         private final Task<R, A> task;
         final Boolean async;
@@ -1201,7 +1223,7 @@ public class TaskChain <T> {
         /**
          * Called internally by Task Chain to facilitate executing the task and then the next task.
          */
-        private void run() {
+        void run() {
             final Object arg = this.chain.previous;
             this.chain.previous = null;
             TaskChain.this.currentActionIndex = this.actionIndex;
