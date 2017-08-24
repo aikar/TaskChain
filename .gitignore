@@ -1,4 +1,5 @@
 *.class
+.DS_Store
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
@@ -8,6 +9,9 @@
 .idea/misc.xml
 .idea/libraries
 .idea/kotlinc.xml
+.idea/modules.xml
+**/*.iml
+
 
 # Package Files #
 *.jar
