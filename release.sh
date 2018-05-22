@@ -14,8 +14,10 @@ files=(*/pom.xml pom.xml README.md CHANGELOG.md)
 next="${a[0]}.${a[1]}.${a[2]}-SNAPSHOT"
 
 ./version.sh "$version"
-mvn clean deploy || (echo "Something went wrong with compile, aborting" ; exit 1)
+mvn -T 4 clean javadoc:jar deploy || (echo "Something went wrong with compile, aborting" ; exit 1)
 
+git add -A docs
+git commit -m "Javadocs $version" docs
 git commit -m "Release $version" ${files[@]}
 git tag -a -m "$version" $version
 
