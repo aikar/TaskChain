@@ -46,6 +46,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 
@@ -341,7 +342,7 @@ public class TaskChain <T> {
      */
     @SuppressWarnings("WeakerAccess")
     public TaskChain<T> abortIfNull(TaskChainAbortAction<?, ?, ?> action) {
-        return abortIf(null, action, null, null, null);
+        return abortIf(Predicate.isEqual(null), action, null, null, null);
     }
 
     /**
@@ -350,7 +351,7 @@ public class TaskChain <T> {
     @SuppressWarnings("WeakerAccess")
     public <A1> TaskChain<T> abortIfNull(TaskChainAbortAction<A1, ?, ?> action, A1 arg1) {
         //noinspection unchecked
-        return abortIf(null, action, arg1, null, null);
+        return abortIf(Predicate.isEqual(null), action, arg1, null, null);
     }
 
     /**
@@ -359,7 +360,7 @@ public class TaskChain <T> {
     @SuppressWarnings("WeakerAccess")
     public <A1, A2> TaskChain<T> abortIfNull(TaskChainAbortAction<A1, A2, ?> action, A1 arg1, A2 arg2) {
         //noinspection unchecked
-        return abortIf(null, action, arg1, arg2, null);
+        return abortIf(Predicate.isEqual(null), action, arg1, arg2, null);
     }
 
     /**
@@ -371,7 +372,7 @@ public class TaskChain <T> {
     @SuppressWarnings("WeakerAccess")
     public <A1, A2, A3> TaskChain<T> abortIfNull(TaskChainAbortAction<A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
         //noinspection unchecked
-        return abortIf(null, action, arg1, arg2, arg3);
+        return abortIf(Predicate.isEqual(null), action, arg1, arg2, arg3);
     }
 
     /**
@@ -409,26 +410,65 @@ public class TaskChain <T> {
     }
 
     /**
-     * Checks if the previous task return is the supplied value, and aborts if it was.
-     * Then executes supplied action handler
-     *
-     * If not null, the previous task return will forward to the next task.
+     * {@link TaskChain#abortIf(Predicate, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
     public <A1, A2, A3> TaskChain<T> abortIf(T ifObj, TaskChainAbortAction<A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
+        return abortIf(Predicate.isEqual(ifObj), action, arg1, arg2, arg3);
+    }
+    
+    /**
+     * Checks if the previous task return matches the supplied predicate, and aborts if it was.
+     * 
+     * If predicate does not match, the previous task return will forward to the next task.
+     */
+    @SuppressWarnings("WeakerAccess")
+    public TaskChain<T> abortIf(Predicate<T> predicate) {
+        return abortIf(predicate, null, null, null, null);
+    }
+
+    /**
+     * {@link TaskChain#abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
+     */
+    @SuppressWarnings("WeakerAccess")
+    public TaskChain<T> abortIf(Predicate<T> predicate, TaskChainAbortAction<?, ?, ?> action) {
+        return abortIf(predicate, action, null, null, null);
+    }
+
+    /**
+     * {@link TaskChain#abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <A1> TaskChain<T> abortIf(Predicate<T> predicate, TaskChainAbortAction<A1, ?, ?> action, A1 arg1) {
+        return abortIf(predicate, action, arg1, null, null);
+    }
+
+    /**
+     * {@link TaskChain#abortIf(Object, TaskChainAbortAction, Object, Object, Object)}
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <A1, A2> TaskChain<T> abortIf(Predicate<T> predicate, TaskChainAbortAction<A1, A2, ?> action, A1 arg1, A2 arg2) {
+        return abortIf(predicate, action, arg1, arg2, null);
+    }
+
+    /**
+     * Checks if the previous task return matches the supplied predicate, and aborts if it was.
+     * Then executes supplied action handler
+     * 
+     * If predicate does not match, the previous task return will forward to the next task.
+     */
+    public <A1, A2, A3> TaskChain<T> abortIf(Predicate<T> predicate, TaskChainAbortAction<A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
         return current((obj) -> {
-            if (Objects.equals(obj, ifObj)) {
-                handleAbortAction(action, arg1, arg2, arg3);
-                return null;
-            }
-            return obj;
+           if (predicate.test(obj)) {
+               handleAbortAction(action, arg1, arg2, arg3);
+               return null;
+           }
+           return obj;
         });
     }
 
     /**
-     * Checks if the previous task return is not the supplied value.
-     *
-     * If it is, the previous task return will forward to the next task.
+     * {@link TaskChain#abortIfNot(Object, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
     public TaskChain<T> abortIfNot(T ifNotObj) {
@@ -460,20 +500,56 @@ public class TaskChain <T> {
     }
 
     /**
-     * Checks if the previous task return is the supplied value, and aborts if it was.
-     * Then executes supplied action handler
-     *
-     * If not null, the previous task return will forward to the next task.
+     * {@link TaskChain#abortIfNot(Predicate, TaskChainAbortAction, Object, Object, Object)}
      */
     @SuppressWarnings("WeakerAccess")
     public <A1, A2, A3> TaskChain<T> abortIfNot(T ifNotObj, TaskChainAbortAction<A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
-        return current((obj) -> {
-            if (!Objects.equals(obj, ifNotObj)) {
-                handleAbortAction(action, arg1, arg2, arg3);
-                return null;
-            }
-            return obj;
-        });
+        return abortIfNot(Predicate.<T>isEqual(ifNotObj), action, arg1, arg2, arg3);
+    }
+    
+    /**
+     * Checks if the previous task return does NOT match the supplied predicate, and aborts if it does not match.
+     * 
+     * If predicate matches, the previous task return will forward to the next task.
+     */
+    @SuppressWarnings("WeakerAccess")
+    public TaskChain<T> abortIfNot(Predicate<T> ifNotPredicate) {
+        return abortIfNot(ifNotPredicate, null, null, null, null);
+    }
+
+    /**
+     * {@link TaskChain#abortIfNot(Object, TaskChainAbortAction, Object, Object, Object)}
+     */
+    @SuppressWarnings("WeakerAccess")
+    public TaskChain<T> abortIfNot(Predicate<T> ifNotPredicate, TaskChainAbortAction<?, ?, ?> action) {
+        return abortIfNot(ifNotPredicate, action, null, null, null);
+    }
+
+    /**
+     * {@link TaskChain#abortIfNot(Object, TaskChainAbortAction, Object, Object, Object)}
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <A1> TaskChain<T> abortIfNot(Predicate<T> ifNotPredicate, TaskChainAbortAction<A1, ?, ?> action, A1 arg1) {
+        return abortIfNot(ifNotPredicate, action, arg1, null, null);
+    }
+
+    /**
+     * {@link TaskChain#abortIfNot(Object, TaskChainAbortAction, Object, Object, Object)}
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <A1, A2> TaskChain<T> abortIfNot(Predicate<T> ifNotPredicate, TaskChainAbortAction<A1, A2, ?> action, A1 arg1, A2 arg2) {
+        return abortIfNot(ifNotPredicate, action, arg1, arg2, null);
+    }
+
+    /**
+     * Checks if the previous task return does NOT match the supplied predicate, and aborts if it does not match.
+     * Then executes supplied action handler
+     * 
+     * If predicate matches, the previous task return will forward to the next task.
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <A1, A2, A3> TaskChain<T> abortIfNot(Predicate<T> ifNotPredicate, TaskChainAbortAction<A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
+        return abortIf(ifNotPredicate.negate(), action, arg1, arg2, arg3);
     }
 
     // </editor-fold>
