@@ -549,7 +549,7 @@ public class TaskChain <T> {
      */
     @SuppressWarnings("WeakerAccess")
     public <A1, A2, A3> TaskChain<T> abortIfNot(Predicate<T> ifNotPredicate, TaskChainAbortAction<A1, A2, A3> action, A1 arg1, A2 arg2, A3 arg3) {
-        return abortIf(Predicate.<T>isEqual(ifNotPredicate).negate(), action, arg1, arg2, arg3);
+        return abortIf(ifNotPredicate.negate(), action, arg1, arg2, arg3);
     }
 
     // </editor-fold>
