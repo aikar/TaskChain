@@ -1,5 +1,8 @@
 # TaskChain Changelog
 
+## Version 3.7.0
+* Added Predicate support to .abortIf style methods
+
 ## Version 3.6.0
 * Added .abortChain() API so you can insert an abort point for dynamic chain creation.
 
