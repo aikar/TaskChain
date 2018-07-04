@@ -74,12 +74,20 @@ public class BukkitTaskChainFactory extends TaskChainFactory {
 
         @Override
         public void postToMain(Runnable run) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, run);
+            if (plugin.isEnabled()) {
+                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, run);
+            } else {
+                run.run();
+            }
         }
 
         @Override
         public void scheduleTask(int ticks, Runnable run) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, run, ticks);
+            if (plugin.isEnabled()) {
+                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, run, ticks);
+            } else {
+                run.run();
+            }
         }
 
         @Override
