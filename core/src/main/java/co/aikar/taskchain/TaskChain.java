@@ -324,7 +324,12 @@ public class TaskChain <T> {
      * @return Chain
      */
     public TaskChain<?> abortChain() {
-        return current(TaskChain::abort);
+        if (executed) {
+            TaskChain.abort();
+            return this;
+        } else {
+            return current(TaskChain::abort);
+        }
     }
 
     /**
