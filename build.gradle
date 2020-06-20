@@ -21,27 +21,15 @@
  *  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-plugins {
-    id 'io.franzbecker.gradle-lombok' version '4.0.0' apply false
-}
-
-import io.franzbecker.gradle.lombok.task.DelombokTask
-
 subprojects {
     apply plugin: 'java'
     apply plugin: 'maven-publish'
-    apply plugin: 'io.franzbecker.gradle-lombok'
 
     group 'co.aikar'
     version '3.7.3-SNAPSHOT'
 
     sourceCompatibility = '1.8'
     targetCompatibility = '1.8'
-
-    lombok {
-        version = '1.18.12'
-        sha256 = ''
-    }
 
     repositories {
         mavenLocal()
@@ -56,22 +44,8 @@ subprojects {
         compileOnly group: 'org.jetbrains', name: 'annotations', version: '19.0.0'
     }
 
-    // Delombok Task
-    task delombok(type: DelombokTask, dependsOn: compileJava) {
-        ext.outputDir = file("${buildDir}/${delombok.name}")
-        outputs.dir(outputDir)
-        sourceSets.main.java.srcDirs.each {
-            inputs.dir(it)
-            args(it, "-d", outputDir)
-        }
-        doFirst {
-            outputDir.deleteDir()
-        }
-    }
-
     javadoc {
-        dependsOn delombok
-        source = delombok.outputDir
+        source = sourceSets.main.allJava
         failOnError = false
     }
 
