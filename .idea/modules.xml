@@ -6,6 +6,10 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/core.iml" filepath="$PROJECT_DIR$/.idea/core.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/sponge.iml" filepath="$PROJECT_DIR$/.idea/sponge.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/taskchain.iml" filepath="$PROJECT_DIR$/.idea/taskchain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/bukkit/taskchain-bukkit.iml" filepath="$PROJECT_DIR$/bukkit/taskchain-bukkit.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core/taskchain-core.iml" filepath="$PROJECT_DIR$/core/taskchain-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/taskchain-parent.iml" filepath="$PROJECT_DIR$/taskchain-parent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sponge/taskchain-sponge.iml" filepath="$PROJECT_DIR$/sponge/taskchain-sponge.iml" />
     </modules>
   </component>
 </project>

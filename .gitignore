@@ -4,12 +4,7 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-.idea/workspace.xml
-.idea/dictionaries
-.idea/misc.xml
-.idea/libraries
-.idea/kotlinc.xml
-.idea/modules.xml
+.idea/
 **/*.iml
 
 
@@ -27,3 +22,8 @@ hs_err_pid*
 .classpath
 .project
 
+# Gradle Files
+.gradle
+bukkit/build/
+core/build/
+sponge/build/

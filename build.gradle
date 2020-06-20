@@ -1,0 +1,113 @@
+/*
+ * Copyright (c) 2016-2020 Daniel Ennis (Aikar) - MIT License
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining
+ *  a copy of this software and associated documentation files (the
+ *  "Software"), to deal in the Software without restriction, including
+ *  without limitation the rights to use, copy, modify, merge, publish,
+ *  distribute, sublicense, and/or sell copies of the Software, and to
+ *  permit persons to whom the Software is furnished to do so, subject to
+ *  the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be
+ *  included in all copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ *  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ *  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ *  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ *  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ *  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ *  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+plugins {
+    id 'io.franzbecker.gradle-lombok' version '4.0.0' apply false
+}
+
+import io.franzbecker.gradle.lombok.task.DelombokTask
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'maven'
+    apply plugin: 'io.franzbecker.gradle-lombok'
+
+    group 'co.aikar'
+    version '3.7.3-SNAPSHOT'
+
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+
+    lombok {
+        version = '1.18.12'
+        sha256 = ''
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            name 'aikar'
+            url 'https://repo.aikar.co/content/groups/aikar/'
+        }
+    }
+
+    dependencies {
+        compileOnly group: 'org.jetbrains', name: 'annotations', version: '19.0.0'
+    }
+
+    // Delombok Task
+    task delombok(type: DelombokTask, dependsOn: compileJava) {
+        ext.outputDir = file("$buildDir/delombok")
+        classpath += project.configurations.compileOnly
+        outputs.dir(outputDir)
+        sourceSets.main.java.srcDirs.each {
+            inputs.dir(it)
+            args(it, "-d", outputDir)
+        }
+    }
+
+    javadoc {
+        dependsOn delombok
+
+        source = file("${buildDir}/${delombok.name}")
+        failOnError = false
+    }
+
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+
+        from sourceSets.main.allSource
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        from javadoc.destinationDir
+        classifier = 'javadoc'
+    }
+
+    artifacts {
+        archives javadocJar
+        archives sourcesJar
+    }
+
+    task deploy() {
+        dependsOn install
+        dependsOn uploadArchives
+    }
+
+    if(project.hasProperty('aikarRepoUser') && project.hasProperty('aikarRepoPass')) {
+        uploadArchives {
+            repositories {
+                mavenDeployer {
+                    repository(url: 'https://repo.aikar.co/content/repositories/aikar-snapshots/') {
+                        authentication(userName: aikarRepoUser, password: aikarRepoPass)
+                    }
+
+                    snapshotRepository(url: 'https://repo.aikar.co/content/repositories/aikar-snapshots/') {
+                        authentication(userName: aikarRepoUser, password: aikarRepoPass)
+                    }
+                }
+            }
+        }
+    }
+}
