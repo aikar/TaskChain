@@ -29,7 +29,7 @@ import io.franzbecker.gradle.lombok.task.DelombokTask
 
 subprojects {
     apply plugin: 'java'
-    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
     apply plugin: 'io.franzbecker.gradle-lombok'
 
     group 'co.aikar'
@@ -58,19 +58,20 @@ subprojects {
 
     // Delombok Task
     task delombok(type: DelombokTask, dependsOn: compileJava) {
-        ext.outputDir = file("$buildDir/delombok")
-        classpath += project.configurations.compileOnly
+        ext.outputDir = file("${buildDir}/${delombok.name}")
         outputs.dir(outputDir)
         sourceSets.main.java.srcDirs.each {
             inputs.dir(it)
             args(it, "-d", outputDir)
         }
+        doFirst {
+            outputDir.deleteDir()
+        }
     }
 
     javadoc {
         dependsOn delombok
-
-        source = file("${buildDir}/${delombok.name}")
+        source = delombok.outputDir
         failOnError = false
     }
 
@@ -91,7 +92,7 @@ subprojects {
     }
 
     task deploy() {
-        dependsOn install
+        dependsOn publishToMavenLocal
         dependsOn uploadArchives
     }
 
