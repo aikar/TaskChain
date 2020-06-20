@@ -11,6 +11,8 @@
 .idea/kotlinc.xml
 .idea/modules.xml
 .idea/sonarlint
+.idea/jarRepositories.xml
+.idea/gradle.xml
 **/*.iml
 
 

@@ -2,16 +2,25 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+      <profile name="Gradle Imported" enabled="true">
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.12/lombok-1.18.12.jar" />
+        </processorPath>
+        <module name="taskchain-parent.taskchain-sponge.test" />
+        <module name="taskchain-parent.taskchain-sponge.main" />
+        <module name="taskchain-parent.taskchain-core.main" />
+        <module name="taskchain-parent.taskchain-core.test" />
+        <module name="taskchain-parent.taskchain-bukkit.test" />
+        <module name="taskchain-parent.taskchain-bukkit.main" />
+      </profile>
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="taskchain-bukkit" />
-        <module name="taskchain-sponge" />
-        <module name="taskchain-core" />
-        <module name="core" />
-        <module name="bukkit" />
-        <module name="sponge" />
+        <module name="taskchain-parent.taskchain-bukkit" />
+        <module name="taskchain-parent.taskchain-core" />
+        <module name="taskchain-parent.taskchain-sponge" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -21,7 +30,6 @@
       <module name="taskchain" target="1.8" />
       <module name="taskchain-bukkit" target="1.8" />
       <module name="taskchain-core" target="1.8" />
-      <module name="taskchain-parent" target="1.8" />
       <module name="taskchain-sponge" target="1.8" />
     </bytecodeTargetLevel>
   </component>
@@ -29,6 +37,9 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="taskchain-bukkit" options="-parameters" />
       <module name="taskchain-core" options="-parameters" />
+      <module name="taskchain-parent.taskchain-bukkit" options="-parameters" />
+      <module name="taskchain-parent.taskchain-core" options="-parameters" />
+      <module name="taskchain-parent.taskchain-sponge" options="-parameters" />
       <module name="taskchain-sponge" options="-parameters" />
     </option>
   </component>
