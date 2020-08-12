@@ -33,14 +33,22 @@
 
 package co.aikar.taskchain;
 
-import co.aikar.taskchain.TaskChainTasks.*;
+import co.aikar.taskchain.TaskChainTasks.AsyncExecutingFirstTask;
+import co.aikar.taskchain.TaskChainTasks.AsyncExecutingGenericTask;
+import co.aikar.taskchain.TaskChainTasks.AsyncExecutingTask;
+import co.aikar.taskchain.TaskChainTasks.FirstTask;
+import co.aikar.taskchain.TaskChainTasks.FutureFirstTask;
+import co.aikar.taskchain.TaskChainTasks.FutureGenericTask;
+import co.aikar.taskchain.TaskChainTasks.FutureTask;
+import co.aikar.taskchain.TaskChainTasks.GenericTask;
+import co.aikar.taskchain.TaskChainTasks.LastTask;
+import co.aikar.taskchain.TaskChainTasks.Task;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
@@ -48,7 +56,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
 
 /**
  * The Main API class of TaskChain. TaskChain's are created by a {@link TaskChainFactory}
@@ -183,7 +190,7 @@ public class TaskChain <T> {
     /**
      * Allows you to call a callback to insert tasks into the chain without having to break the fluent interface
      *
-     * Example: Plugin.newChain().sync(some::task).configure(chain -> {
+     * Example: Plugin.newChain().sync(some::task).configure(chain -&gt; {
      *     chain.async(some::foo);
      *     chain.sync(other::bar);
      * }).async(other::task).execute();

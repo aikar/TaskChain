@@ -8,8 +8,12 @@
 .idea/dictionaries
 .idea/misc.xml
 .idea/libraries
+.idea/compiler.xml
 .idea/kotlinc.xml
 .idea/modules.xml
+.idea/sonarlint
+.idea/jarRepositories.xml
+.idea/gradle.xml
 **/*.iml
 
 
@@ -19,6 +23,7 @@
 *.ear
 */target
 target
+
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
@@ -27,3 +32,9 @@ hs_err_pid*
 .classpath
 .project
 
+# Gradle Files
+.gradle/
+build/
+bukkit/build/
+core/build/
+sponge/build/
