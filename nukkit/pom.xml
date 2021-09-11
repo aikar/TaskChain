@@ -1,6 +1,6 @@
-
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Copyright (c) 2016-2017 Daniel Ennis (Aikar) - MIT License
+  ~ Copyright (c) 2016-2021 Daniel Ennis (Aikar) - MIT License
   ~
   ~  Permission is hereby granted, free of charge, to any person obtaining
   ~  a copy of this software and associated documentation files (the
@@ -22,7 +22,8 @@
   ~  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -32,23 +33,24 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>taskchain-sponge</artifactId>
+    <artifactId>taskchain-nukkit</artifactId>
     <version><!--VERSION-->3.7.3-SNAPSHOT<!--VERSION--></version>
     <packaging>jar</packaging>
-    <name>TaskChain (Sponge)</name>
+    <name>TaskChain (Nukkit)</name>
+
     <repositories>
         <repository>
-            <id>sponge-maven-repo</id>
-            <name>Sponge maven repo</name>
-            <url>https://repo.spongepowered.org/maven</url>
+            <id>opencollab-repo-snapshot</id>
+            <url>https://repo.opencollab.dev/maven-snapshots/</url>
             <releases>
-                <enabled>true</enabled>
+                <enabled>false</enabled>
             </releases>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
         </repository>
     </repositories>
+
     <dependencies>
         <dependency>
             <groupId>co.aikar</groupId>
@@ -56,10 +58,11 @@
             <version><!--VERSION-->3.7.3-SNAPSHOT<!--VERSION--></version>
         </dependency>
         <dependency>
-            <groupId>org.spongepowered</groupId>
-            <artifactId>spongeapi</artifactId>
-            <version>6.0.0-SNAPSHOT</version>
+            <groupId>cn.nukkit</groupId>
+            <artifactId>nukkit</artifactId>
+            <version>1.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
+
 </project>
