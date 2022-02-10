@@ -96,7 +96,7 @@ public class BukkitTaskChainFactory extends TaskChainFactory {
                 @EventHandler
                 public void onPluginDisable(PluginDisableEvent event) {
                     if (event.getPlugin().equals(plugin)) {
-                        factory.shutdown(60, TimeUnit.SECONDS);
+                        factory.shutdown(30, TimeUnit.SECONDS);
                     }
                 }
             }, plugin);
