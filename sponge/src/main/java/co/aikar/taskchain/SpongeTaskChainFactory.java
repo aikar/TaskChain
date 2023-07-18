@@ -24,12 +24,16 @@
 package co.aikar.taskchain;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.game.state.GameStoppingEvent;
-import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.event.EventListenerRegistration;
+import org.spongepowered.api.event.lifecycle.StoppedGameEvent;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.util.Ticks;
+import org.spongepowered.plugin.PluginContainer;
 
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import static com.sun.tools.javac.main.Option.G;
 
 @SuppressWarnings("WeakerAccess")
 public class SpongeTaskChainFactory extends TaskChainFactory {
@@ -38,7 +42,7 @@ public class SpongeTaskChainFactory extends TaskChainFactory {
     }
 
     public static TaskChainFactory create(PluginContainer pluginContainer) {
-        return create(pluginContainer.getInstance().orElse(null));
+        return create(pluginContainer.instance());
     }
     public static TaskChainFactory create(Object plugin) {
         return new SpongeTaskChainFactory(plugin, new TaskChainAsyncQueue());
@@ -59,7 +63,8 @@ public class SpongeTaskChainFactory extends TaskChainFactory {
 
         private SpongeGameInterface(Object plugin, AsyncQueue asyncQueue) {
             this.asyncQueue = asyncQueue;
-            if (plugin == null || !Sponge.getPluginManager().fromInstance(plugin).isPresent()) {
+
+            if (plugin == null || !Sponge.pluginManager().fromInstance(plugin).isPresent()) {
                 throw new IllegalArgumentException("Not a valid Sponge Plugin");
             }
             this.plugin = plugin;
@@ -67,7 +72,7 @@ public class SpongeTaskChainFactory extends TaskChainFactory {
 
         @Override
         public boolean isMainThread() {
-            return Sponge.getServer().isMainThread();
+            return Sponge.server().onMainThread();
         }
 
         @Override
@@ -77,19 +82,19 @@ public class SpongeTaskChainFactory extends TaskChainFactory {
 
         @Override
         public void postToMain(Runnable run) {
-            Task.builder().execute(run).submit(plugin);
+            Task.builder().execute(run).build();
         }
 
         @Override
         public void scheduleTask(int gameUnits, Runnable run) {
-            Task.builder().delayTicks(gameUnits).execute(run).submit(plugin);
+            Task.builder().delay(Ticks.of(gameUnits)).execute(run).build();
         }
 
         @Override
         public void registerShutdownHandler(TaskChainFactory factory) {
-            Sponge.getEventManager().registerListener(plugin, GameStoppingEvent.class, event -> {
+            Sponge.eventManager().registerListener(EventListenerRegistration.builder(StoppedGameEvent.class).plugin((PluginContainer) plugin).listener(event -> {
                 factory.shutdown(60, TimeUnit.SECONDS);
-            });
+            }).build());
         }
     }
 }
