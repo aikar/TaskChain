@@ -32,23 +32,18 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>taskchain-sponge</artifactId>
+    <artifactId>taskchain-folia</artifactId>
     <version><!--VERSION-->3.7.3-SNAPSHOT<!--VERSION--></version>
     <packaging>jar</packaging>
-    <name>TaskChain (Sponge)</name>
+    <name>TaskChain (Folia)</name>
+
     <repositories>
         <repository>
-            <id>sponge-maven-repo</id>
-            <name>Sponge maven repo</name>
-            <url>https://repo.spongepowered.org/maven</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
     </repositories>
+
     <dependencies>
         <dependency>
             <groupId>co.aikar</groupId>
@@ -56,9 +51,9 @@
             <version><!--VERSION-->3.7.3-SNAPSHOT<!--VERSION--></version>
         </dependency>
         <dependency>
-            <groupId>org.spongepowered</groupId>
-            <artifactId>spongeapi</artifactId>
-            <version>6.0.0-SNAPSHOT</version>
+            <groupId>dev.folia</groupId>
+            <artifactId>folia-api</artifactId>
+            <version>1.20.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
