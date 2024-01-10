@@ -9,15 +9,10 @@
         <module name="core" />
         <module name="sponge" />
         <module name="bukkit" />
+        <module name="taskchain-bukkit" />
         <module name="taskchain-core" />
         <module name="folia" />
         <module name="taskchain-sponge" />
-      </profile>
-      <profile name="Annotation profile for TaskChain (All)" enabled="true">
-        <sourceOutputDir name="../folia/target/generated-sources/annotations" />
-        <sourceTestOutputDir name="../folia/target/generated-test-sources/test-annotations" />
-        <outputRelativeToContentRoot value="true" />
-        <module name="taskchain-bukkit" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
