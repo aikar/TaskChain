@@ -20,6 +20,8 @@ TaskChain then executes your task pipe line, switching thread context where need
     - [[GUIDE: Using in your Bukkit Plugins](https://github.com/aikar/TaskChain/wiki/implementing-bukkit)]
   - Sponge Minecraft Servers
     - [[GUIDE: Using in your Sponge Plugins](https://github.com/aikar/TaskChain/wiki/implementing-sponge)]
+  - Folia Servers
+    - Same methods employed by BukkitTaskChainFactory but instead use FoliaTaskChainFactory
 
 ### Planned
   - Forge Minecraft Servers [[#2](https://github.com/aikar/TaskChain/issues/2)]

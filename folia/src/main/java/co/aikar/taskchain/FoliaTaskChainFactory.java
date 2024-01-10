@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017 Daniel Ennis (Aikar) - MIT License
+ * Copyright (c) 2016-2024 Daniel Ennis (Aikar) - MIT License
  *
  *  Permission is hereby granted, free of charge, to any person obtaining
  *  a copy of this software and associated documentation files (the
@@ -30,33 +30,29 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.TimeUnit;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
-public class BukkitTaskChainFactory extends TaskChainFactory {
-    private BukkitTaskChainFactory(Plugin plugin, AsyncQueue asyncQueue) {
-        super(new BukkitGameInterface(plugin, asyncQueue));
+public class FoliaTaskChainFactory extends TaskChainFactory {
+
+    private FoliaTaskChainFactory(Plugin plugin, AsyncQueue asyncQueue) {
+        super(new FoliaGameInterface(plugin, asyncQueue));
     }
 
-    public static TaskChainFactory create(Plugin plugin) {
-        return new BukkitTaskChainFactory(plugin, new TaskChainAsyncQueue());
+    @Contract("_ -> new")
+    public static @NotNull TaskChainFactory create(Plugin plugin) {
+        return new FoliaTaskChainFactory(plugin, new TaskChainAsyncQueue());
     }
-/* @TODO: #9 - Not Safe to do this
-    public static TaskChainFactory create(Plugin plugin, ThreadPoolExecutor executor) {
-        return new BukkitTaskChainFactory(plugin, new TaskChainAsyncQueue(executor));
-    }
-
-    public static TaskChainFactory create(Plugin plugin, AsyncQueue asyncQueue) {
-        return new BukkitTaskChainFactory(plugin, asyncQueue);
-    }*/
 
     @SuppressWarnings("PublicInnerClass")
-    private static class BukkitGameInterface implements GameInterface {
+    private static class FoliaGameInterface implements GameInterface {
         private final Plugin plugin;
         private final AsyncQueue asyncQueue;
 
-        BukkitGameInterface(Plugin plugin, AsyncQueue asyncQueue) {
+        FoliaGameInterface(Plugin plugin, AsyncQueue asyncQueue) {
             this.plugin = plugin;
             this.asyncQueue = asyncQueue;
         }
@@ -74,7 +70,7 @@ public class BukkitTaskChainFactory extends TaskChainFactory {
         @Override
         public void postToMain(Runnable run) {
             if (plugin.isEnabled()) {
-                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, run);
+                Bukkit.getGlobalRegionScheduler().execute(plugin, run);
             } else {
                 run.run();
             }
@@ -83,7 +79,8 @@ public class BukkitTaskChainFactory extends TaskChainFactory {
         @Override
         public void scheduleTask(int ticks, Runnable run) {
             if (plugin.isEnabled()) {
-                Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, run, ticks);
+                Bukkit.getGlobalRegionScheduler().runDelayed(plugin, task ->
+                        Bukkit.getGlobalRegionScheduler().execute(plugin, run), ticks);
             } else {
                 run.run();
             }
@@ -104,13 +101,14 @@ public class BukkitTaskChainFactory extends TaskChainFactory {
 
     public static final TaskChainAbortAction<Player, String, ?> MESSAGE = new TaskChainAbortAction<Player, String, Object>() {
         @Override
-        public void onAbort(TaskChain<?> chain, Player player, String message) {
+        public void onAbort(TaskChain<?> chain, @NotNull Player player, String message) {
             player.sendMessage(message);
         }
     };
+
     public static final TaskChainAbortAction<Player, String, ?> COLOR_MESSAGE = new TaskChainAbortAction<Player, String, Object>() {
         @Override
-        public void onAbort(TaskChain<?> chain, Player player, String message) {
+        public void onAbort(TaskChain<?> chain, @NotNull Player player, String message) {
             player.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
         }
     };
